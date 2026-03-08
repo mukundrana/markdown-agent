@@ -37,7 +37,7 @@ AI follows 10-stage workflow:
   9. SECURITY → SECURITY
   10. DEPLOY → DEPLOY
      ↓
-State persisted to session/*.md files
+State persisted to markdown-agent/session/*.json files
 ```
 
 ### Key Components
@@ -48,8 +48,8 @@ State persisted to session/*.md files
 | Configuration | System settings | `config.md` |
 | Agents | 20 specialized agents | `agents/*.md` |
 | Stage Templates | Stage instructions | `templates/stages/*.md` |
-| Session Templates | Initial state | `templates/session/*.template.md` |
-| Runtime Files | Execution state | `session/*.md` (gitignored) |
+| Session Templates | Initial state | `templates/session/*.template.md` (inside markdown-agent/) |
+| Runtime Files | Execution state | `markdown-agent/session/*.js *.json` (gitignored) |
 
 ---
 
@@ -81,10 +81,11 @@ This produces better plans than a single planning agent.
 ### 3. Self-Documenting Execution
 
 Every action is logged to:
-- `session/log.md` - Timestamped history
-- `session/state.md` - Current status
-- `session/checkpoints.md` - Resumption points
-- `session/visualizer.html` - Live dashboard
+- `markdown-agent/session/data.js` - Combined data for dashboard
+- `markdown-agent/session/config.json` - Session config
+- `markdown-agent/session/tasks/task-N/state.json` - Current status
+- `markdown-agent/session/tasks/task-N/log.json` - Log entries
+- `markdown-agent/session/tasks/task-N/checkpoints.json` - Resumption points
 
 This creates a complete audit trail that survives context resets.
 
@@ -127,10 +128,9 @@ This is a good mental model for task execution order.
 
 ```
 After EVERY action:
-├── session/log.md        (append entry)
-├── session/state.md      (update current state)
-├── session/checkpoints.md (add checkpoint)
-└── session/visualizer.html (update JSON in HTML)
+├── markdown-agent/session/data.js (sync dashboard data)
+├── markdown-agent/session/queue.json (update queue if changed)
+└── markdown-agent/session/tasks/task-N/*.json (update task files)
 ```
 
 **Problem**: This is heavy overhead. Each action = 8+ file operations (read + write for each file).
@@ -231,7 +231,7 @@ QUALITY_CHECK runs:
 6. File Size
 
 ## Output
-- Single `session/quality_report.md`
+- Single `markdown-agent/session/tasks/task-N/quality_report.json`
 - Pass/Fail verdict with scores
 - Blocking issues listed separately
 - Auto-fix suggestions
@@ -269,8 +269,8 @@ QUALITY_CHECK runs:
 
 **Option A**: Separate JSON file
 ```
-session/visualizer-data.json  <- AI updates this (simple JSON)
-session/visualizer.html       <- Reads from JSON (user can refresh browser)
+markdown-agent/session/data.js        <- AI updates this (dashboard data)
+markdown-agent/dashboard.html         <- Reads from data.js (user can refresh browser)
 ```
 
 **Option B**: Skip visualizer during execution
@@ -296,7 +296,7 @@ SECURITY finds critical vulnerability? → "proceed to DEPLOY anyway"
 ## Error Handling Protocol
 
 ### Verification Failure
-1. Log failure details to session/log.md
+1. Log failure details to markdown-agent/session/tasks/task-N/log.json
 2. IF < 3 test failures:
    - Return to IMPLEMENTATION for fixes
    - CODER addresses specific failures
@@ -306,7 +306,7 @@ SECURITY finds critical vulnerability? → "proceed to DEPLOY anyway"
    - Do NOT proceed to REVIEW
 
 ### Critical Security Vulnerability
-1. Log vulnerability to session/security_report.md
+1. Log vulnerability to markdown-agent/session/tasks/task-N/security_report.json
 2. IF vulnerability is EXPLOITABLE:
    - Pause and ask user immediately
    - Do NOT proceed to DEPLOY
@@ -315,7 +315,7 @@ SECURITY finds critical vulnerability? → "proceed to DEPLOY anyway"
    - Log fix applied
 
 ### Implementation Syntax Error
-1. Log error to session/log.md
+1. Log error to markdown-agent/session/tasks/task-N/log.json
 2. Attempt fix (3 retries max)
 3. IF still failing:
    - Trigger DEBUGGER agent
@@ -414,7 +414,7 @@ After task confirmation:
 After each stage, before starting next:
 1. Check if next stage is skippable
 2. IF skippable:
-   - Log skip reason to session/log.md
+   - Log skip reason to markdown-agent/session/tasks/task-N/log.json
    - Jump to next applicable stage
 3. IF not skippable:
    - Proceed with next stage
@@ -585,12 +585,12 @@ Details:
 
 ```
 
-All state in one file: `session/log.md`
+All state in one file: `markdown-agent/session/data.js`
 
 Remove:
-- session/state.md (merge into log)
-- session/checkpoints.md (merge into log)
-- session/visualizer.html updates during execution (update after completion only)
+- markdown-agent/session/tasks/task-N/state.json (merge into data.js)
+- markdown-agent/session/tasks/task-N/checkpoints.json (merge into data.js)
+- markdown-agent/dashboard.html updates during execution (update after completion only)
 
 ### Improvement 3: Error Recovery Protocol
 
@@ -611,7 +611,7 @@ Add to `root.md`:
 ### Failure Response
 
 When a stage fails:
-1. Log failure to session/log.md with status: FAILED
+1. Log failure to markdown-agent/session/tasks/task-N/log.json with status: FAILED
 2. Check failure type from table above
 3. Take appropriate action
 4. DO NOT proceed to next stage until failure resolved

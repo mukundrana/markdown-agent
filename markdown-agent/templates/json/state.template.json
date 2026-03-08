@@ -111,6 +111,140 @@
         "timestamp": {"type": "string"},
         "retryCount": {"type": "integer"}
       }
+    },
+    "context": {
+      "type": "object",
+      "description": "Context management for token optimization",
+      "properties": {
+        "tokenCount": {
+          "type": "integer",
+          "description": "Current estimated token count"
+        },
+        "compressionLevel": {
+          "type": "string",
+          "enum": ["minimal", "standard", "full"],
+          "description": "Current compression level"
+        },
+        "archivedStages": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "List of archived stage names"
+        },
+        "summaries": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "summary": {"type": "string"},
+              "keyOutcomes": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "duration": {"type": "string"},
+              "compressed": {"type": "boolean"}
+            }
+          },
+          "description": "Stage summaries keyed by stage name"
+        },
+        "lastCompressedAt": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "tokenHistory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": {"type": "string", "format": "date-time"},
+              "count": {"type": "integer"}
+            }
+          }
+        }
+      }
+    },
+    "kpis": {
+      "type": "object",
+      "description": "Key Performance Indicators tracking",
+      "properties": {
+        "efficiency": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "actual": {"type": "number"},
+              "target": {"type": "number"},
+              "unit": {"type": "string"},
+              "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+            }
+          }
+        },
+        "quality": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "actual": {"type": "number"},
+              "target": {"type": "number"},
+              "unit": {"type": "string"},
+              "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+            }
+          }
+        },
+        "reliability": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "actual": {"type": "number"},
+              "target": {"type": "number"},
+              "unit": {"type": "string"},
+              "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+            }
+          }
+        },
+        "process": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "actual": {"type": "number"},
+              "target": {"type": "number"},
+              "unit": {"type": "string"},
+              "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+            }
+          }
+        },
+        "overall": {
+          "type": "object",
+          "properties": {
+            "score": {"type": "integer", "minimum": 0, "maximum": 100},
+            "verdict": {"type": "string", "enum": ["EXCELLENT", "GOOD", "ACCEPTABLE", "NEEDS IMPROVEMENT"]}
+          }
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": {"type": "string", "format": "date-time"},
+              "overall": {"type": "integer"},
+              "verdict": {"type": "string"}
+            }
+          }
+        },
+        "alerts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "level": {"type": "string", "enum": ["warning", "critical"]},
+              "message": {"type": "string"},
+              "kpi": {"type": "string"},
+              "recommendation": {"type": "string"}
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -1,0 +1,37 @@
+# ============================================
+# Markdown Agent System - .gitignore
+# ============================================
+
+# Session Runtime Files - DO NOT COMMIT
+# Project-specific state that resets for each new project
+
+session/tasks/
+session/queue.json
+
+# Optional: Track config.json across projects (uncomment to ignore)
+# session/config.json
+
+# ============================================
+# Project-Specific Files
+# ============================================
+
+PLAN.md
+task-requirements/
+
+# ============================================
+# System Files
+# ============================================
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Logs
+*.log

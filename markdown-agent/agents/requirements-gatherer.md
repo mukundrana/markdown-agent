@@ -24,6 +24,23 @@ You are the **REQUIREMENTS-GATHERER** agent. You collect detailed requirements b
 
 ---
 
+## Key Responsibility Areas (KRA)
+
+**Primary KRA**: Requirements Elicitation
+
+**Responsibilities**:
+1. Ask clarifying questions
+2. Define acceptance criteria
+3. Document requirements
+4. Validate understanding
+
+**Success Criteria**:
+- 5-10 questions asked (if needed)
+- 3-7 acceptance criteria defined
+- Requirements documented
+
+---
+
 ## STATE MANAGEMENT (JSON)
 
 ### File Paths
@@ -70,7 +87,21 @@ session/tasks/task-N/
     "acceptanceCriteriaCount": {{COUNT}},
     "reportFile": "reports/requirements.json"
   },
-  "nextAgent": "PLANNER"
+  "nextAgent": "PLANNER",
+  "kpi": {
+    "agentExecutionTime": {
+      "actual": {{MINUTES}},
+      "target": 10,
+      "unit": "minutes",
+      "status": "pass"
+    },
+    "documentationCoverage": {
+      "actual": 100,
+      "target": 80,
+      "unit": "percentage",
+      "status": "pass"
+    }
+  }
 }
 ```
 
@@ -240,6 +271,7 @@ window.DASHBOARD_DATA = {
 3. What are the inputs/outputs?
 4. Any edge cases?
 5. Any preferences?
+6. **UI Design Style**: Minimal, Modern Glassmorphism, Vibrant Gradient, Dark/Light Theme?
 
 ### For Bugs:
 1. How do you reproduce this?

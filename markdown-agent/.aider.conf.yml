@@ -1,0 +1,30 @@
+# Aider Configuration
+
+## Autonomous Agent System
+
+This project uses an autonomous agent system with a 10-stage workflow.
+
+### Before using Aider:
+
+1. **READ** `markdown-agent/root.md` first
+2. **FOLLOW** the trigger protocol when user says "go baby go"
+3. **UPDATE** JSON state files after changes
+
+### Workflow:
+- Do not write code directly
+- Follow the 10 stages in markdown-agent/agents/
+- Update markdown-agent/session/tasks/task-N/state.json
+- Sync to markdown-agent/session/data.js
+
+### Trigger:
+When user says "go baby go", read markdown-agent/root.md and follow the protocol.
+
+### Files to track:
+- markdown-agent/session/tasks/*/state.json
+- markdown-agent/session/tasks/*/log.json
+- markdown-agent/session/data.js
+
+### Ignore:
+- markdown-agent/session/tasks/*/reports/
+- *.tmp
+- node_modules/

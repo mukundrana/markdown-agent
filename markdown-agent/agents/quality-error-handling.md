@@ -24,6 +24,23 @@ You are the **ERROR HANDLING** checker. You ensure proper error handling.
 
 ---
 
+## Key Responsibility Areas (KRA)
+
+**Primary KRA**: Exception Coverage
+
+**Responsibilities**:
+1. Check try/catch coverage
+2. Verify error messages
+3. Test error recovery
+4. Validate logging
+
+**Success Criteria**:
+- All risky code wrapped
+- Meaningful error messages
+- Recovery paths defined
+
+---
+
 ## STATE MANAGEMENT (JSON)
 
 ### File Paths

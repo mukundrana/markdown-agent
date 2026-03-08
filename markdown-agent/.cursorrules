@@ -1,0 +1,34 @@
+# AUTONOMOUS AGENT SYSTEM - CURSOR RULES
+
+## ⛔ CRITICAL: READ THIS FIRST ⛔
+
+This project uses an Autonomous Agent System with a 10-stage workflow.
+
+### TRIGGER PHRASE
+When user says **"go baby go"**:
+
+1. **READ** `markdown-agent/root.md` (MANDATORY)
+2. **CHECK/CREATE** `markdown-agent/session/` folder (INSIDE markdown-agent/)
+3. **READ** `markdown-agent/session/data.js` and `markdown-agent/session/config.json`
+4. **FOLLOW** the 10-stage workflow
+5. **UPDATE** JSON state files after every action
+
+### YOU MUST NOT:
+- Write code directly without following the workflow
+- Skip stages (REQUIREMENTS → PLANNING → IMPLEMENTATION → etc.)
+- Ignore the markdown-agent/session/data.js file
+
+### THE WORKFLOW:
+1. REQUIREMENTS → agents/requirements-gatherer.md
+2. PLANNING → agents/planner.md → critic.md → synthesizer.md
+3. IMPLEMENTATION → agents/coder.md
+4. VERIFICATION → agents/tester.md
+5. REVIEW → agents/reviewer.md
+6. QUALITY_CHECK → agents/quality-*.md
+7. REFACTOR → agents/refactor.md
+8. PERFORMANCE → agents/performance.md
+9. SECURITY → agents/security.md
+10. DEPLOY → agents/deploy.md
+
+### IF YOU IGNORE THIS:
+Read `markdown-agent/root.md` and follow the protocol!

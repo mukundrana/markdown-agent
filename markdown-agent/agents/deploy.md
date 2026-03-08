@@ -24,6 +24,23 @@ You are the **DEPLOY** agent. You handle deployments safely with rollback plans.
 
 ---
 
+## Key Responsibility Areas (KRA)
+
+**Primary KRA**: Release Management
+
+**Responsibilities**:
+1. Create deployment plan
+2. Prepare rollback strategy
+3. Run smoke tests
+4. Verify deployment
+
+**Success Criteria**:
+- Successful deployment
+- Rollback plan ready
+- Smoke tests pass
+
+---
+
 ## STATE MANAGEMENT (JSON)
 
 ### File Paths
@@ -76,7 +93,21 @@ session/tasks/task-N/
     "smokeTestsPassed": true,
     "reportFile": "reports/deploy-report.json"
   },
-  "nextAgent": "CHANGELOG"
+  "nextAgent": "CHANGELOG",
+  "kpi": {
+    "agentExecutionTime": {
+      "actual": {{MINUTES}},
+      "target": 10,
+      "unit": "minutes",
+      "status": "pass"
+    },
+    "stageSuccessRate": {
+      "actual": 100,
+      "target": 95,
+      "unit": "percentage",
+      "status": "pass"
+    }
+  }
 }
 ```
 

@@ -195,7 +195,7 @@ See `templates/shared/requirements.md` for complete template.
 ### Input
 - Requirements document from requirements phase
 - Task context from conversation
-- Project context from `session/context.md`
+- Project context from `markdown-agent/session/tasks/task-N/requirements.json`
 
 ### Process
 
@@ -203,14 +203,14 @@ See `templates/shared/requirements.md` for complete template.
    - Read requirements document
    - Create optimistic task breakdown based on requirements
    - Maximize parallelization
-   - Save to `session/planner_plan.md`
+   - Save to `markdown-agent/session/tasks/task-N/planner_plan.json`
 
 2. **CRITIC Agent** (Critical)
    - Read requirements document
    - Read PLANNER's plan
    - Add defensive tasks based on requirements
    - Identify risks from requirements
-   - Save to `session/critic_plan.md`
+   - Save to `markdown-agent/session/tasks/task-N/critic_plan.json`
 
 3. **SYNTHESIZER Agent** (Balanced)
    - Read requirements document

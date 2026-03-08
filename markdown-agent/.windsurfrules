@@ -1,0 +1,33 @@
+# AUTONOMOUS AGENT SYSTEM - WINDSURF RULES
+
+## ⛔ STOP - THIS PROJECT USES AN AUTONOMOUS AGENT SYSTEM ⛔
+
+### TRIGGER: "go baby go"
+
+When you hear this phrase, you MUST:
+
+1. READ `markdown-agent/root.md` FIRST
+2. CHECK/CREATE `markdown-agent/session/` folder (INSIDE markdown-agent/)
+3. READ `markdown-agent/session/data.js` and `markdown-agent/session/config.json`
+4. FOLLOW the 10-stage workflow
+5. UPDATE JSON state files after every action
+
+### FORBIDDEN ACTIONS:
+- Writing code directly
+- Skipping stages
+- Creating files without updating state
+
+### THE 10 STAGES (ALL MANDATORY):
+1. REQUIREMENTS
+2. PLANNING
+3. IMPLEMENTATION
+4. VERIFICATION
+5. REVIEW
+6. QUALITY_CHECK
+7. REFACTOR
+8. PERFORMANCE
+9. SECURITY
+10. DEPLOY
+
+### START HERE:
+Read `markdown-agent/root.md` for the full protocol.

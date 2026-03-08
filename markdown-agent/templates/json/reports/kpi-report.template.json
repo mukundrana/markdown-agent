@@ -1,0 +1,312 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kpi-report.json",
+  "title": "KPI Report",
+  "description": "Key Performance Indicator report for task completion",
+  "type": "object",
+  "required": ["taskId", "generatedAt", "agent", "kpis", "overall"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^task-[0-9]+$",
+      "description": "Task identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Report generation timestamp"
+    },
+    "agent": {
+      "type": "string",
+      "enum": ["ORCHESTRATOR", "KPI_TRACKER"],
+      "description": "Agent that generated the report"
+    },
+    "reportPeriod": {
+      "type": "object",
+      "description": "Report time period",
+      "properties": {
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "duration": {
+          "type": "string",
+          "description": "Human-readable duration"
+        }
+      }
+    },
+    "kpis": {
+      "type": "object",
+      "description": "KPIs by category",
+      "properties": {
+        "efficiency": {
+          "type": "object",
+          "description": "Efficiency KPIs",
+          "properties": {
+            "agentExecutionTime": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "stageCompletionRate": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "contextTokenEfficiency": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "summary": {
+              "type": "object",
+              "properties": {
+                "pass": {"type": "integer"},
+                "warn": {"type": "integer"},
+                "fail": {"type": "integer"},
+                "score": {"type": "number"}
+              }
+            }
+          }
+        },
+        "quality": {
+          "type": "object",
+          "description": "Quality KPIs",
+          "properties": {
+            "codeQualityScore": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "testPassRate": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "securityScore": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "summary": {
+              "type": "object",
+              "properties": {
+                "pass": {"type": "integer"},
+                "warn": {"type": "integer"},
+                "fail": {"type": "integer"},
+                "score": {"type": "number"}
+              }
+            }
+          }
+        },
+        "reliability": {
+          "type": "object",
+          "description": "Reliability KPIs",
+          "properties": {
+            "retryRate": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "stageSuccessRate": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "bugEscapeRate": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "summary": {
+              "type": "object",
+              "properties": {
+                "pass": {"type": "integer"},
+                "warn": {"type": "integer"},
+                "fail": {"type": "integer"},
+                "score": {"type": "number"}
+              }
+            }
+          }
+        },
+        "process": {
+          "type": "object",
+          "description": "Process KPIs",
+          "properties": {
+            "waveParallelization": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "checkpointUtilization": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "documentationCoverage": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            },
+            "summary": {
+              "type": "object",
+              "properties": {
+                "pass": {"type": "integer"},
+                "warn": {"type": "integer"},
+                "fail": {"type": "integer"},
+                "score": {"type": "number"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "overall": {
+      "type": "object",
+      "description": "Overall KPI score",
+      "properties": {
+        "score": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Overall score (0-100)"
+        },
+        "verdict": {
+          "type": "string",
+          "enum": ["EXCELLENT", "GOOD", "ACCEPTABLE", "NEEDS IMPROVEMENT"],
+          "description": "Overall verdict"
+        },
+        "breakdown": {
+          "type": "object",
+          "properties": {
+            "efficiency": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "quality": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "reliability": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            },
+            "process": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100
+            }
+          }
+        }
+      }
+    },
+    "alerts": {
+      "type": "array",
+      "description": "KPI alerts",
+      "items": {
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": ["warning", "critical"]
+          },
+          "message": {
+            "type": "string"
+          },
+          "kpi": {
+            "type": "string"
+          },
+          "actual": {
+            "type": "number"
+          },
+          "target": {
+            "type": "number"
+          },
+          "recommendation": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "description": "Performance improvement recommendations",
+      "items": {
+        "type": "string"
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata",
+      "properties": {
+        "totalStages": {
+          "type": "integer"
+        },
+        "totalAgents": {
+          "type": "integer"
+        },
+        "totalLogEntries": {
+          "type": "integer"
+        },
+        "contextCompressionUsed": {
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

@@ -84,7 +84,7 @@ version: "[X.Y.Z]"
 **STOP. Complete ALL items before proceeding:**
 
 1. [ ] This file was READ using Read tool (not simulated)
-2. [ ] Add entry to session/log.md
+2. [ ] Add entry to markdown-agent/session/tasks/task-N/log.json
 3. [ ] [Additional requirements]
 
 ---

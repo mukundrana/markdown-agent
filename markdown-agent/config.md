@@ -1,12 +1,12 @@
 ---
-config_version: "2.0.0"
-agent_count: 20
+config_version: "3.2.0"
+agent_count: 21
 max_parallel_waves: 3
 retry_attempts: 3
 workflow_stages: 10
 ---
 
-# Agent Configuration (v2.0 - Complete)
+# Agent Configuration (v3.2 - With Task Queue Manager)
 
 ## System Settings
 
@@ -19,7 +19,17 @@ workflow_stages: 10
 
 ---
 
-# All Agent Roles (20 Agents)
+# All Agent Roles (21 Agents)
+
+## 📋 Queue Management (1)
+
+### 0. TASK_MANAGER (Queue Coordinator)
+**File**: `agents/task-manager.md`
+**Personality**: Coordinator, organized
+**Voice**: "Task queued...", "Starting next task..."
+**Responsibilities**: Manages task queue, accepts new tasks, controls execution order
+
+---
 
 ## 🎯 Planning Agents (3)
 
@@ -342,4 +352,104 @@ Feature is complete when:
 
 ---
 
+# Context Management Settings
+
+## Token Budget Configuration
+
+| Setting | Value | Description |
+|---------|-------|-------------|
+| Total Context Window | 200,000 tokens | Maximum context capacity |
+| Reserved for System | 50,000 tokens | System + code reservation |
+| Available for Agents | 150,000 tokens | Usable context for agents |
+| Warning Threshold | 120,000 tokens (80%) | Trigger compression |
+| Critical Threshold | 140,000 tokens (93%) | Force compression |
+
+## Retention Rules
+
+| Rule | Value | Description |
+|------|-------|-------------|
+| keepFullDetail | 3 stages | Last 3 stages in full detail |
+| keepSummary | 4 stages | Stages 4-7 as summary |
+| compressAfter | 7 stages | Compress stages 8+ |
+| maxLogEntries | 50 per task | Maximum log entries |
+
+## Context Levels
+
+| Level | Retention | Estimated Tokens |
+|-------|-----------|------------------|
+| minimal | Current stage only | ~2,000 |
+| standard | Last 2 full + summaries | ~4,500 |
+| full | All stages full | ~15,000+ |
+
+---
+
+# KRA/KPI Framework
+
+## Key Responsibility Areas (KRA)
+
+Each agent has a defined Primary KRA:
+
+### Planning Agents
+- **PLANNER**: Task Breakdown & Parallelization
+- **CRITIC**: Risk Assessment & Mitigation
+- **SYNTHESIZER**: Plan Consolidation
+
+### Execution Agents
+- **CODER**: Clean Code Implementation
+- **TESTER**: Validation & Quality Assurance
+
+### Coordination Agents
+- **ORCHESTRATOR**: Workflow Management
+- **REQUIREMENTS-GATHERER**: Requirements Elicitation
+- **REVIEWER**: Code Review
+
+### Quality Checkers
+- **TYPE_SAFETY**: Type System Integrity
+- **VALIDATION**: Input Security
+- **ERROR_HANDLING**: Exception Coverage
+- **API_CONSISTENCY**: Interface Standards
+- **DATABASE**: Data Safety
+- **FILE_SIZE**: Code Organization
+
+### Specialized Agents
+- **DEBUGGER**: Root Cause Analysis
+- **REFACTOR**: Code Quality Improvement
+- **PERFORMANCE**: Optimization
+- **SECURITY**: Vulnerability Prevention
+- **DEPLOY**: Release Management
+- **CHANGELOG**: Documentation
+
+## Key Performance Indicators (KPI)
+
+### Efficiency KPIs
+| KPI | Target | Unit |
+|-----|--------|------|
+| agentExecutionTime | Varies by stage | minutes |
+| stageCompletionRate | 95% | percentage |
+| contextTokenEfficiency | > 0.8 | score/1000tokens |
+
+### Quality KPIs
+| KPI | Target | Unit |
+|-----|--------|------|
+| codeQualityScore | 8.0 | score (0-10) |
+| testPassRate | 95% | percentage |
+| securityScore | 80 | score (0-100) |
+
+### Reliability KPIs
+| KPI | Target | Unit |
+|-----|--------|------|
+| retryRate | < 5% | percentage |
+| bugEscapeRate | 0 | count |
+| stageSuccessRate | 95% | percentage |
+
+### Process KPIs
+| KPI | Target | Unit |
+|-----|--------|------|
+| waveParallelization | > 2 | tasks/wave |
+| checkpointUtilization | >= 7 | count |
+| documentationCoverage | 80% | percentage |
+
+---
+
 *See `docs/guides/help.md` for detailed usage instructions.*
+*See `docs/reference/kra-kpi-reference.md` for KRA/KPI details.*

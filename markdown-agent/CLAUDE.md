@@ -24,7 +24,7 @@ This file contains the complete protocol. Do NOT proceed without reading it.
 
 ### Step 2: CHECK/CREATE SESSION
 ```
-CHECK if markdown-agent/session/ folder exists
+CHECK if markdown-agent/session/ folder exists (INSIDE markdown-agent/)
 ├── If NO: CREATE markdown-agent/session/ with:
 │   ├── data.js (empty template - see root.md)
 │   ├── config.json (empty template - see root.md)
@@ -60,7 +60,7 @@ If queue has IN_PROGRESS task:
 ## ✅ YOU MUST
 
 - ✅ Read markdown-agent/root.md FIRST
-- ✅ Check/Create markdown-agent/session folder
+- ✅ Check/Create markdown-agent/session folder (INSIDE markdown-agent/)
 - ✅ Read markdown-agent/session/data.js and markdown-agent/session/config.json
 - ✅ Follow the 10-stage workflow:
   1. REQUIREMENTS
@@ -74,7 +74,7 @@ If queue has IN_PROGRESS task:
   9. SECURITY
   10. DEPLOY
 - ✅ Update JSON state files after every action
-- ✅ Sync to session/data.js for dashboard
+- ✅ Sync to markdown-agent/session/data.js for dashboard
 
 ---
 
@@ -83,19 +83,19 @@ If queue has IN_PROGRESS task:
 ```
 project/
 ├── CLAUDE.md              ← You are here
-├── src/                   ← Your code goes here
-└── markdown-agent/        ← Agent system
-    ├── root.md           ← THE PROTOCOL (READ THIS!)
-    ├── agents/           ← Agent definitions
-    ├── templates/        ← Templates
-    ├── dashboard.html    ← Visual dashboard
-    └── session/          ← Runtime state (create if missing)
-        ├── data.js       ← Combined data for dashboard
-        ├── config.json   ← Session config
-        └── tasks/task-N/ ← Per-task files
-            ├── state.json
-            ├── log.json
-            └── checkpoints.json
+├── markdown-agent/        ← Agent system
+│   ├── root.md           ← THE PROTOCOL (READ THIS!)
+│   ├── agents/           ← Agent definitions
+│   ├── templates/        ← Templates
+│   ├── dashboard.html    ← Visual dashboard
+│   └── session/          ← Runtime state (create if missing, INSIDE markdown-agent/)
+│       ├── data.js       ← Combined data for dashboard
+│       ├── config.json   ← Session config
+│       └── tasks/task-N/ ← Per-task files
+│           ├── state.json
+│           ├── log.json
+│           └── checkpoints.json
+└── src/                   ← Your code goes here
 ```
 
 ---

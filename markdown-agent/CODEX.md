@@ -8,8 +8,8 @@ When you see this phrase:
 
 1. **STOP** - Do not write code yet
 2. **READ** `markdown-agent/root.md`
-3. **CREATE** `session/` folder if missing
-4. **READ** `session/data.js`
+3. **CREATE** `markdown-agent/session/` folder if missing (INSIDE markdown-agent/)
+4. **READ** `markdown-agent/session/data.js`
 5. **FOLLOW** 10-stage workflow
 
 ### The Workflow (ALL STAGES MANDATORY)
@@ -22,7 +22,7 @@ REQUIREMENTS → PLANNING → IMPLEMENTATION → VERIFICATION → REVIEW
 ### State Files
 
 ```
-session/
+markdown-agent/session/
 ├── data.js          ← Combined data for dashboard
 ├── config.json      ← Session config
 └── tasks/task-N/
@@ -39,7 +39,7 @@ session/
 ### Required
 - Read markdown-agent/root.md first
 - Update JSON files after every action
-- Sync to session/data.js
+- Sync to markdown-agent/session/data.js
 
 ---
 

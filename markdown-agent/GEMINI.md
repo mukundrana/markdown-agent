@@ -7,8 +7,8 @@
 When you hear this phrase, you MUST:
 
 1. **READ** `markdown-agent/root.md` FIRST
-2. **CHECK** for `session/` folder (create if missing)
-3. **READ** `session/data.js` and `session/config.json`
+2. **CHECK** for `markdown-agent/session/` folder (create if missing, INSIDE markdown-agent/)
+3. **READ** `markdown-agent/session/data.js` and `markdown-agent/session/config.json`
 4. **FOLLOW** the 10-stage workflow
 5. **UPDATE** state files after every action
 
@@ -30,7 +30,7 @@ When you hear this phrase, you MUST:
 ### Rules
 - ✅ Follow the workflow in order
 - ✅ Update JSON state files
-- ✅ Sync to session/data.js
+- ✅ Sync to markdown-agent/session/data.js
 - ❌ Don't write code directly
 - ❌ Don't skip stages
 

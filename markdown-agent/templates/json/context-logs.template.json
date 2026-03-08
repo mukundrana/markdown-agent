@@ -1,0 +1,231 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "context-logs.json",
+  "title": "Context Log Retention Rules",
+  "description": "Rules for retaining and pruning context logs",
+  "type": "object",
+  "properties": {
+    "retention": {
+      "type": "object",
+      "description": "Log retention configuration",
+      "properties": {
+        "keepFullDetail": {
+          "type": "integer",
+          "default": 3,
+          "description": "Number of recent stages to keep in full detail"
+        },
+        "keepSummary": {
+          "type": "integer",
+          "default": 4,
+          "description": "Number of stages to keep as summaries (stages 4-7)"
+        },
+        "compressAfter": {
+          "type": "integer",
+          "default": 7,
+          "description": "Compress stages older than this number"
+        },
+        "maxLogEntries": {
+          "type": "integer",
+          "default": 50,
+          "description": "Maximum log entries per task"
+        },
+        "archiveFile": {
+          "type": "string",
+          "default": "log-archive.json",
+          "description": "File name for archived logs"
+        }
+      }
+    },
+    "compression": {
+      "type": "object",
+      "description": "Compression settings",
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "triggerThreshold": {
+          "type": "integer",
+          "default": 80,
+          "description": "Trigger compression at this percentage of context capacity"
+        },
+        "compressionLevel": {
+          "type": "string",
+          "enum": ["minimal", "standard", "aggressive"],
+          "default": "standard",
+          "description": "How aggressively to compress logs"
+        }
+      }
+    },
+    "stages": {
+      "type": "array",
+      "description": "Stage retention rules",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": ["REQUIREMENTS", "PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "QUALITY_CHECK", "REFACTOR", "PERFORMANCE", "SECURITY", "DEPLOY"]
+          },
+          "retainFull": {
+            "type": "boolean",
+            "description": "Keep full logs for this stage"
+          },
+          "retainSummary": {
+            "type": "boolean",
+            "description": "Keep summary only for this stage"
+          },
+          "compress": {
+            "type": "boolean",
+            "description": "Compress logs for this stage"
+          }
+        }
+      }
+    },
+    "archive": {
+      "type": "object",
+      "description": "Archive configuration",
+      "properties": {
+        "format": {
+          "type": "string",
+          "enum": ["json", "jsonl"],
+          "default": "json"
+        },
+        "compression": {
+          "type": "string",
+          "enum": ["none", "gzip", "brotli"],
+          "default": "none"
+        },
+        "maxArchiveSize": {
+          "type": "integer",
+          "default": 1048576,
+          "description": "Maximum archive size in bytes (1MB default)"
+        }
+      }
+    },
+    "tokenBudget": {
+      "type": "object",
+      "description": "Token budget settings",
+      "properties": {
+        "totalContextWindow": {
+          "type": "integer",
+          "default": 200000,
+          "description": "Total context window size"
+        },
+        "reservedForSystem": {
+          "type": "integer",
+          "default": 50000,
+          "description": "Tokens reserved for system and code"
+        },
+        "availableForAgents": {
+          "type": "integer",
+          "default": 150000,
+          "description": "Tokens available for agent context"
+        },
+        "warningThreshold": {
+          "type": "integer",
+          "default": 120000,
+          "description": "Warning threshold (80% of available)"
+        },
+        "criticalThreshold": {
+          "type": "integer",
+          "default": 140000,
+          "description": "Critical threshold (93% of available)"
+        }
+      }
+    },
+    "perEntryTokenEstimates": {
+      "type": "object",
+      "description": "Estimated tokens per log entry type",
+      "properties": {
+        "logEntry": {
+          "type": "integer",
+          "default": 200,
+          "description": "Average tokens per log.json entry"
+        },
+        "agentFile": {
+          "type": "integer",
+          "default": 500,
+          "description": "Average tokens per agent file read"
+        },
+        "stateJson": {
+          "type": "integer",
+          "default": 300,
+          "description": "Average tokens for state.json"
+        },
+        "planJson": {
+          "type": "integer",
+          "default": 400,
+          "description": "Average tokens for plan.json"
+        },
+        "checkpoint": {
+          "type": "integer",
+          "default": 150,
+          "description": "Average tokens per checkpoint"
+        },
+        "summary": {
+          "type": "integer",
+          "default": 50,
+          "description": "Average tokens per compressed summary"
+        }
+      }
+    },
+    "contextLevels": {
+      "type": "object",
+      "description": "Context level configurations",
+      "properties": {
+        "minimal": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "default": "Current stage + last checkpoint only"
+            },
+            "estimatedTokens": {
+              "type": "integer",
+              "default": 2000
+            },
+            "retention": {
+              "type": "string",
+              "default": "Current stage only"
+            }
+          }
+        },
+        "standard": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "default": "Last 2 stages full + summaries for older stages"
+            },
+            "estimatedTokens": {
+              "type": "integer",
+              "default": 4500
+            },
+            "retention": {
+              "type": "string",
+              "default": "Last 2 stages full, summaries for rest"
+            }
+          }
+        },
+        "full": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string",
+              "default": "All stages with full detail (no pruning)"
+            },
+            "estimatedTokens": {
+              "type": "integer",
+              "default": 15000
+            },
+            "retention": {
+              "type": "string",
+              "default": "All stages full"
+            }
+          }
+        }
+      }
+    }
+  }
+}

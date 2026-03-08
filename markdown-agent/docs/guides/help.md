@@ -131,11 +131,11 @@ DEPLOY safely deploys to production
 
 ### Checkpoints
 
-Created at key points for safe resumption. Stored in `session/checkpoints.md`.
+Created at key points for safe resumption. Stored in `markdown-agent/session/tasks/task-N/checkpoints.json`.
 
 ### Logs
 
-Append-only log in `session/log.md` records all actions.
+Append-only log in `markdown-agent/session/tasks/task-N/log.json` records all actions.
 
 ---
 
@@ -150,20 +150,20 @@ Append-only log in `session/log.md` records all actions.
 ### Agent stuck?
 
 - Check `state.md` for current position
-- Read `session/checkpoints.md` for last checkpoint
+- Read `markdown-agent/session/tasks/task-N/checkpoints.json` for last checkpoint
 - Try resuming with explicit instructions
 
 ### Tests failing?
 
-- Read `session/log.md` for error details
+- Read `markdown-agent/session/tasks/task-N/log.json` for error details
 - Check if bug tasks were created in plan.md
 - Ensure CODER implemented fixes
 
 ### Lost progress?
 
 - Progress is in `state.md`
-- Full history in `session/log.md`
-- Checkpoints in `session/checkpoints.md`
+- Full history in `markdown-agent/session/tasks/task-N/log.json`
+- Checkpoints in `markdown-agent/session/tasks/task-N/checkpoints.json`
 
 ---
 
@@ -209,9 +209,11 @@ Append-only log in `session/log.md` records all actions.
 - `templates/shared/checkpoint.md` - Checkpoint format
 
 ### Session Files
-- `session/context.md` - Your feature request
-- `session/log.md` - Execution history
-- `session/checkpoints.md` - Resumption points
+- `markdown-agent/session/data.js` - Combined data for dashboard
+- `markdown-agent/session/config.json` - Session config
+- `markdown-agent/session/tasks/task-N/state.json` - Current state
+- `markdown-agent/session/tasks/task-N/log.json` - Execution history
+- `markdown-agent/session/tasks/task-N/checkpoints.json` - Resumption points
 
 ---
 

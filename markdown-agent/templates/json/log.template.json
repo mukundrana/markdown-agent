@@ -27,6 +27,7 @@
           "agent": {
             "type": "string",
             "enum": [
+              "TASK_MANAGER",
               "ORCHESTRATOR",
               "REQUIREMENTS-GATHERER",
               "PLANNER",
@@ -51,7 +52,7 @@
           },
           "stage": {
             "type": "string",
-            "enum": ["INIT", "REQUIREMENTS", "PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "QUALITY_CHECK", "REFACTOR", "PERFORMANCE", "SECURITY", "DEPLOY", "DEBUG", "COMPLETE"]
+            "enum": ["INIT", "QUEUE", "REQUIREMENTS", "PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "QUALITY_CHECK", "REFACTOR", "PERFORMANCE", "SECURITY", "DEPLOY", "DEBUG", "COMPLETE", "EXECUTION"]
           },
           "action": {
             "type": "string",
@@ -59,7 +60,7 @@
           },
           "status": {
             "type": "string",
-            "enum": ["success", "failed", "in_progress", "warning", "info"]
+            "enum": ["success", "failed", "in_progress", "warning", "info", "queued", "cancelled", "skipped"]
           },
           "details": {
             "type": "object",
@@ -81,6 +82,19 @@
             "type": "array",
             "items": {"type": "string"},
             "description": "Files created or modified"
+          },
+          "kpi": {
+            "type": ["object", "null"],
+            "description": "Key Performance Indicators for this action",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "actual": {"type": "number"},
+                "target": {"type": "number"},
+                "unit": {"type": "string"},
+                "status": {"type": "string", "enum": ["pass", "warn", "fail"]}
+              }
+            }
           }
         }
       }

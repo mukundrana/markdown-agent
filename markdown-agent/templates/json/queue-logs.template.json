@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "queue-logs.json",
+  "title": "Queue Operation Logs",
+  "description": "Global logs for queue and system-wide operations",
+  "type": "object",
+  "required": ["entries"],
+  "properties": {
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "timestamp", "type", "action", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^qlog-[0-9]+$",
+            "description": "Unique log entry identifier"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the operation occurred"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["queue", "task", "system", "error"],
+            "description": "Type of operation"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action that was performed"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["success", "failed", "warning", "info", "queued"],
+            "description": "Status of the operation"
+          },
+          "details": {
+            "type": "object",
+            "description": "Additional details about the operation",
+            "properties": {
+              "taskId": {
+                "type": "string",
+                "description": "Related task ID"
+              },
+              "taskName": {
+                "type": "string",
+                "description": "Related task name"
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["critical", "high", "medium", "low"]
+              },
+              "complexity": {
+                "type": "string",
+                "enum": ["trivial", "simple", "moderate", "complex"]
+              },
+              "queuePosition": {
+                "type": "integer",
+                "description": "Position in queue"
+              },
+              "previousStatus": {
+                "type": "string",
+                "description": "Status before transition"
+              },
+              "newStatus": {
+                "type": "string",
+                "description": "Status after transition"
+              },
+              "errorMessage": {
+                "type": "string",
+                "description": "Error message if failed"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -13,9 +13,9 @@ This project uses an **Autonomous Agent System** with a structured workflow.
 When the user says **"go baby go"**, follow these steps EXACTLY:
 
 1. **READ** `markdown-agent/root.md` (This is MANDATORY)
-2. **CHECK** if `session/` folder exists
+2. **CHECK** if `markdown-agent/session/` folder exists (INSIDE markdown-agent/)
    - If NO: Create it with empty `data.js`, `config.json`, `tasks/`
-   - If YES: Read `session/data.js` and `session/config.json`
+   - If YES: Read `markdown-agent/session/data.js` and `markdown-agent/session/config.json`
 3. **RESPOND** based on queue status:
    - Empty queue: "What would you like me to build?"
    - Has task: Resume from current stage
@@ -44,7 +44,7 @@ When the user says **"go baby go"**, follow these steps EXACTLY:
 
 ### File Structure:
 ```
-session/
+markdown-agent/session/
 ├── data.js           ← Dashboard data (READ/WRITE)
 ├── config.json       ← Session config (READ)
 └── tasks/task-N/
@@ -54,9 +54,9 @@ session/
 ```
 
 ### After EVERY Action:
-1. UPDATE `tasks/task-N/state.json`
-2. APPEND to `tasks/task-N/log.json`
-3. SYNC to `session/data.js` (for dashboard)
+1. UPDATE `markdown-agent/session/tasks/task-N/state.json`
+2. APPEND to `markdown-agent/session/tasks/task-N/log.json`
+3. SYNC to `markdown-agent/session/data.js` (for dashboard)
 
 ---
 
@@ -74,7 +74,7 @@ session/
 - Read `markdown-agent/root.md` first
 - Follow the 10-stage workflow
 - Update state files after every action
-- Sync to `session/data.js`
+- Sync to `markdown-agent/session/data.js`
 
 ---
 

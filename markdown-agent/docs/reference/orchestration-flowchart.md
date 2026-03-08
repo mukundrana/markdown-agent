@@ -42,14 +42,14 @@ This flowchart shows exactly which agents run when, and in what order.
 │                   ┌───────────────────────────────────────┐               │
 │                   │ 1. PLANNER Agent (Optimistic)     │               │
 │                   │    ↓ Creates optimistic plan        │               │
-│                   │    ↓ session/planner_plan.md      │               │
+│                   │    ↓ markdown-agent/session/tasks/task-N/planner_plan.json │               │
 │                   └───────────────────────────────────────┘               │
 │                         ↓                                         │               │
 │                   ┌───────────────────────────────────────┐               │
 │                   │ 2. CRITIC Agent (Critical)        │               │
 │                   │    ↓ Reads PLANNER's plan          │               │
 │                   │    ↓ Adds defensive tasks         │               │
-│                   │    ↓ session/critic_plan.md       │               │
+│                   │    ↓ markdown-agent/session/tasks/task-N/critic_plan.json  │               │
 │                   └───────────────────────────────────────┘               │
 │                         ↓                                         │               │
 │                   ┌───────────────────────────────────────┐               │
