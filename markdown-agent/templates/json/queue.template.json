@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "session-queue.json",
+  "title": "Session Task Queue",
+  "description": "Global queue managing all tasks in the session",
+  "type": "object",
+  "required": ["updatedAt", "tasks"],
+  "properties": {
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "status", "priority", "createdAt"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^task-[0-9]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pending", "in_progress", "paused", "completed", "failed", "cancelled"]
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low"]
+          },
+          "complexity": {
+            "type": "string",
+            "enum": ["trivial", "simple", "moderate", "complex"]
+          },
+          "workflow": {
+            "type": "string",
+            "enum": ["quick", "standard", "full"]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "completedAt": {
+            "type": ["string", "null"],
+            "format": "date-time"
+          },
+          "currentStage": {
+            "type": ["string", "null"]
+          },
+          "progress": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "error": {
+            "type": ["object", "null"],
+            "properties": {
+              "message": {"type": "string"},
+              "stage": {"type": "string"},
+              "timestamp": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "statistics": {
+      "type": "object",
+      "properties": {
+        "total": {"type": "integer"},
+        "pending": {"type": "integer"},
+        "inProgress": {"type": "integer"},
+        "completed": {"type": "integer"},
+        "failed": {"type": "integer"},
+        "cancelled": {"type": "integer"}
+      }
+    },
+    "nextTaskId": {
+      "type": ["string", "null"],
+      "description": "ID of the next task to work on"
+    }
+  }
+}

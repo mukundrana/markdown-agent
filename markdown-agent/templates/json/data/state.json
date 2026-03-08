@@ -1,0 +1,46 @@
+{
+  "taskId": "task-1",
+  "name": "",
+  "status": "pending",
+  "complexity": "moderate",
+  "workflow": "full",
+  "currentStage": {
+    "name": "INIT",
+    "number": 0,
+    "progress": 0
+  },
+  "currentWave": null,
+  "agents": {
+    "completed": [],
+    "current": null,
+    "pending": [
+      "REQUIREMENTS-GATHERER",
+      "PLANNER",
+      "CRITIC",
+      "SYNTHESIZER",
+      "CODER",
+      "TESTER",
+      "REVIEWER",
+      "QUALITY_TYPE_SAFETY",
+      "QUALITY_VALIDATION",
+      "QUALITY_ERROR_HANDLING",
+      "QUALITY_API_CONSISTENCY",
+      "QUALITY_DATABASE",
+      "QUALITY_FILE_SIZE",
+      "REFACTOR",
+      "PERFORMANCE",
+      "SECURITY",
+      "DEPLOY"
+    ]
+  },
+  "metrics": {
+    "filesCreated": 0,
+    "filesModified": 0,
+    "testsPassed": 0,
+    "testsFailed": 0,
+    "qualityScore": 0
+  },
+  "error": null,
+  "createdAt": null,
+  "updatedAt": null
+}

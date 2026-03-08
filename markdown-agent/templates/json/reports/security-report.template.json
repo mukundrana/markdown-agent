@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "security-report.json",
+  "title": "Security Report",
+  "description": "Security audit results from SECURITY agent",
+  "type": "object",
+  "required": ["taskId", "generatedAt", "agent", "score", "verdict"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^task-[0-9]+$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "agent": {
+      "type": "string",
+      "const": "SECURITY"
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Overall security score (0-100)"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["secure", "vulnerabilities_found", "critical"],
+      "description": "secure = 90+, vulnerabilities_found = 60-89, critical = < 60"
+    },
+    "vulnerabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "severity", "type", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^vuln-[0-9]+$"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["critical", "high", "medium", "low", "info"]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "sql_injection",
+              "xss",
+              "csrf",
+              "authentication",
+              "authorization",
+              "secrets_exposed",
+              "insecure_deserialization",
+              "path_traversal",
+              "command_injection",
+              "ssrf",
+              "other"
+            ]
+          },
+          "title": {"type": "string"},
+          "description": {"type": "string"},
+          "file": {"type": "string"},
+          "line": {"type": ["integer", "integer"]},
+          "code": {"type": "string"},
+          "status": {
+            "type": "string",
+            "enum": ["found", "confirmed", "fixed", "false_positive"]
+          },
+          "exploitability": {
+            "type": "string",
+            "enum": ["exploitable", "potential", "theoretical"]
+          },
+          "recommendation": {"type": "string"},
+          "fixedAt": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "checks": {
+      "type": "object",
+      "properties": {
+        "sqlInjection": {
+          "type": "object",
+          "properties": {
+            "status": {"type": "string", "enum": ["pass", "fail", "n/a"]},
+            "queriesChecked": {"type": "integer"},
+            "issuesFound": {"type": "integer"}
+          }
+        },
+        "xss": {
+          "type": "object",
+          "properties": {
+            "status": {"type": "string", "enum": ["pass", "fail", "n/a"]},
+            "inputsChecked": {"type": "integer"},
+            "issuesFound": {"type": "integer"}
+          }
+        },
+        "csrf": {
+          "type": "object",
+          "properties": {
+            "status": {"type": "string", "enum": ["pass", "fail", "n/a"]},
+            "tokensPresent": {"type": "boolean"}
+          }
+        },
+        "authentication": {
+          "type": "object",
+          "properties": {
+            "status": {"type": "string", "enum": ["pass", "fail", "n/a"]},
+            "mechanism": {"type": "string"},
+            "notes": {"type": "string"}
+          }
+        },
+        "authorization": {
+          "type": "object",
+          "properties": {
+            "status": {"type": "string", "enum": ["pass", "fail", "n/a"]},
+            "checksPerformed": {"type": "integer"}
+          }
+        },
+        "secrets": {
+          "type": "object",
+          "properties": {
+            "status": {"type": "string", "enum": ["pass", "fail"]},
+            "filesScanned": {"type": "integer"},
+            "hardcodedSecretsFound": {"type": "integer"}
+          }
+        },
+        "inputValidation": {
+          "type": "object",
+          "properties": {
+            "status": {"type": "string", "enum": ["pass", "fail", "n/a"]},
+            "inputsChecked": {"type": "integer"},
+            "unvalidatedInputs": {"type": "integer"}
+          }
+        }
+      }
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": ["proceed", "fix_first", "block_and_fix", "manual_review"]
+    },
+    "blockingReason": {
+      "type": ["string", "null"],
+      "description": "If recommendation is 'block_and_fix', explains why"
+    }
+  }
+}

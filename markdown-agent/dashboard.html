@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Agent Dashboard - Comprehensive</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #6366f1;
+            --primary-light: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #06b6d4;
+            --purple: #a855f7;
+            --pink: #ec4899;
+            --dark: #0f172a;
+            --darker: #020617;
+            --card: rgba(30, 41, 59, 0.95);
+            --card-light: rgba(51, 65, 85, 0.8);
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --border: rgba(99, 102, 241, 0.2);
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: linear-gradient(135deg, #020617, #0f172a, #1e1b4b);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 15px;
+            line-height: 1.5;
+        }
+        .container { max-width: 1600px; margin: 0 auto; }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header h1 { font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+        .header-stats { display: flex; gap: 20px; }
+        .header-stat { text-align: center; }
+        .header-stat-value { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+        .header-stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .last-updated { color: var(--muted); font-size: 0.8rem; }
+
+        /* Grid System */
+        .grid { display: grid; gap: 15px; }
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+        .grid-5 { grid-template-columns: 2fr 1fr 1fr 1fr 1fr; }
+        @media (max-width: 1200px) { .grid-3, .grid-4, .grid-5 { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 768px) { .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; } }
+
+        /* Cards */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            transition: box-shadow 0.3s;
+        }
+        .card:hover { box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15); }
+        .card h2 { font-size: 0.95rem; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .card h3 { font-size: 0.85rem; color: var(--muted); margin-bottom: 10px; font-weight: 600; }
+        .card-subtitle { font-size: 0.75rem; color: var(--muted); margin-top: -8px; margin-bottom: 10px; }
+
+        /* Status Row */
+        .status-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .status-row:last-child { border-bottom: none; }
+        .status-label { color: var(--muted); font-size: 0.85rem; }
+        .status-value { font-weight: 600; font-size: 0.9rem; }
+        .status-value.idle, .status-value.pending { color: var(--muted); }
+        .status-value.complete, .status-value.completed { color: var(--success); }
+        .status-value.in_progress { color: var(--warning); }
+        .status-value.failed { color: var(--danger); }
+
+        /* Badges */
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; }
+        .badge-high { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .badge-medium { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .badge-low { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .badge-complex { background: rgba(168, 85, 247, 0.2); color: var(--purple); }
+        .badge-simple { background: rgba(6, 182, 212, 0.2); color: var(--info); }
+
+        /* Progress Bar */
+        .progress-section { margin-top: 12px; }
+        .progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--primary), var(--success)); transition: width 0.5s; }
+        .progress-info { display: flex; justify-content: space-between; margin-top: 6px; font-size: 0.8rem; color: var(--muted); }
+
+        /* Stage Pills */
+        .stages { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+        .stage { padding: 5px 10px; border-radius: 12px; font-size: 0.7rem; font-weight: 500; }
+        .stage.pending { background: rgba(255,255,255,0.05); color: var(--muted); }
+        .stage.in_progress { background: var(--primary); color: white; }
+        .stage.complete { background: var(--success); color: white; }
+
+        /* Scrollable Containers */
+        .timeline, .checkpoints-container, .scrollable { max-height: 300px; overflow-y: auto; }
+        .scrollable-sm { max-height: 200px; overflow-y: auto; }
+
+        /* Log Entry */
+        .entry { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+        .entry-time { font-size: 0.7rem; color: var(--muted); min-width: 70px; }
+        .entry-icon { font-size: 0.9rem; }
+        .entry-content { flex: 1; }
+        .entry-agent { font-weight: 600; font-size: 0.8rem; color: var(--primary); }
+        .entry-action { font-size: 0.75rem; color: var(--muted); }
+
+        /* Checkpoint */
+        .checkpoint { padding: 10px; background: rgba(99, 102, 241, 0.08); border-left: 3px solid var(--primary); margin-bottom: 6px; border-radius: 0 6px 6px 0; }
+        .checkpoint-name { font-weight: 600; font-size: 0.8rem; }
+        .checkpoint-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+        /* Task Queue Item */
+        .task { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(255,255,255,0.03); border-radius: 8px; margin-bottom: 6px; cursor: pointer; transition: background 0.2s; }
+        .task:hover { background: rgba(99, 102, 241, 0.1); }
+        .task.active { border: 1px solid var(--primary); background: rgba(99, 102, 241, 0.15); }
+        .task-info { flex: 1; min-width: 0; }
+        .task-name { font-weight: 600; font-size: 0.85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .task-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+        .task-status { padding: 3px 10px; border-radius: 10px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }
+        .task-status.pending { background: rgba(255,255,255,0.1); }
+        .task-status.in_progress { background: var(--warning); color: #000; }
+        .task-status.completed { background: var(--success); }
+        .task-status.failed { background: var(--danger); }
+
+        /* Quality Metrics */
+        .quality-item { margin-bottom: 10px; }
+        .quality-header { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px; }
+        .quality-bar { height: 5px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; }
+        .quality-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .total-score { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .total-score .value { font-size: 2rem; font-weight: 700; color: var(--success); }
+        .total-score .label { font-size: 0.8rem; color: var(--muted); }
+
+        /* Report Sections */
+        .report-grid { display: grid; gap: 10px; }
+        .report-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 6px; }
+        .report-item-label { font-size: 0.8rem; color: var(--muted); }
+        .report-item-value { font-size: 0.85rem; font-weight: 600; }
+        .report-item-value.pass { color: var(--success); }
+        .report-item-value.fail { color: var(--danger); }
+        .report-item-value.warning { color: var(--warning); }
+        .report-item-value.info { color: var(--info); }
+
+        /* Test Results */
+        .test-summary { display: flex; gap: 15px; margin-bottom: 10px; }
+        .test-stat { text-align: center; flex: 1; }
+        .test-stat-value { font-size: 1.3rem; font-weight: 700; }
+        .test-stat-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
+        .test-pass { color: var(--success); }
+        .test-fail { color: var(--danger); }
+        .test-skip { color: var(--warning); }
+
+        /* Coverage Bar */
+        .coverage-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .coverage-item { background: rgba(255,255,255,0.03); padding: 8px; border-radius: 6px; }
+        .coverage-label { font-size: 0.75rem; color: var(--muted); }
+        .coverage-bar { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 4px; }
+        .coverage-fill { height: 100%; border-radius: 2px; }
+
+        /* Check Status Grid */
+        .check-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+        .check-item { display: flex; align-items: center; gap: 6px; padding: 6px; background: rgba(255,255,255,0.03); border-radius: 4px; font-size: 0.75rem; }
+        .check-icon { width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; }
+        .check-icon.pass { background: var(--success); }
+        .check-icon.fail { background: var(--danger); }
+
+        /* Wave Timeline */
+        .wave-timeline { display: flex; gap: 4px; margin-top: 10px; }
+        .wave { flex: 1; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 600; }
+        .wave.pending { background: rgba(255,255,255,0.05); color: var(--muted); }
+        .wave.in_progress { background: var(--primary); color: white; }
+        .wave.complete { background: var(--success); color: white; }
+
+        /* Requirement List */
+        .req-list { list-style: none; }
+        .req-item { display: flex; gap: 8px; padding: 6px 0; font-size: 0.8rem; }
+        .req-bullet { color: var(--primary); }
+        .req-text { flex: 1; color: var(--text); }
+
+        /* Stats Cards */
+        .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
+        .stat-card { background: rgba(255,255,255,0.03); padding: 10px; border-radius: 8px; text-align: center; }
+        .stat-card-value { font-size: 1.3rem; font-weight: 700; color: var(--primary); }
+        .stat-card-label { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; }
+
+        /* Tabs */
+        .tabs { display: flex; gap: 4px; margin-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .tab { padding: 8px 12px; font-size: 0.8rem; cursor: pointer; border-radius: 6px 6px 0 0; transition: background 0.2s; color: var(--muted); }
+        .tab:hover { background: rgba(255,255,255,0.05); }
+        .tab.active { background: var(--primary); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Empty State */
+        .empty { text-align: center; color: var(--muted); padding: 20px; font-style: italic; font-size: 0.85rem; }
+
+        /* Task Selector */
+        .task-selector { margin-bottom: 10px; }
+        .task-selector label { font-size: 0.8rem; color: var(--muted); margin-right: 8px; }
+        .task-selector select { background: var(--dark); color: var(--text); border: 1px solid var(--border); padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+        ::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+
+        /* Metrics Summary */
+        .metrics-summary { display: flex; gap: 10px; flex-wrap: wrap; }
+        .metric-pill { padding: 4px 10px; background: rgba(99, 102, 241, 0.1); border-radius: 15px; font-size: 0.75rem; }
+        .metric-pill-label { color: var(--muted); margin-right: 4px; }
+        .metric-pill-value { font-weight: 600; color: var(--text); }
+
+        /* Security Score */
+        .security-score-display { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; margin-bottom: 10px; }
+        .security-score-value { font-size: 2rem; font-weight: 700; color: var(--success); }
+        .security-score-label { font-size: 0.9rem; color: var(--muted); }
+
+        /* Issues List */
+        .issue-item { padding: 8px; background: rgba(239, 68, 68, 0.1); border-left: 3px solid var(--danger); border-radius: 0 6px 6px 0; margin-bottom: 6px; }
+        .issue-severity { font-size: 0.65rem; text-transform: uppercase; font-weight: 600; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-right: 6px; }
+        .issue-severity.critical { background: var(--danger); color: white; }
+        .issue-severity.high { background: #f97316; color: white; }
+        .issue-severity.medium { background: var(--warning); color: black; }
+        .issue-severity.low { background: var(--info); color: white; }
+        .issue-desc { font-size: 0.75rem; color: var(--text); }
+
+        /* Timeline visualization */
+        .timeline-viz { height: 40px; display: flex; align-items: center; gap: 2px; margin: 10px 0; }
+        .timeline-block { flex: 1; height: 100%; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; font-weight: 600; }
+
+        /* Description text */
+        .description { font-size: 0.8rem; color: var(--muted); line-height: 1.4; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <h1>📊 Agent Dashboard</h1>
+                <div class="header-stats">
+                    <div class="header-stat">
+                        <div class="header-stat-value" id="totalTasks">0</div>
+                        <div class="header-stat-label">Tasks</div>
+                    </div>
+                    <div class="header-stat">
+                        <div class="header-stat-value" id="completedTasks">0</div>
+                        <div class="header-stat-label">Done</div>
+                    </div>
+                    <div class="header-stat">
+                        <div class="header-stat-value" id="activeTasks">0</div>
+                        <div class="header-stat-label">Active</div>
+                    </div>
+                </div>
+            </div>
+            <div class="last-updated" id="lastUpdated">Never updated</div>
+        </div>
+
+        <!-- Task Selector (when multiple tasks) -->
+        <div class="task-selector" id="taskSelectorContainer" style="display: none;">
+            <label>View Task:</label>
+            <select id="taskSelector" onchange="selectTask(this.value)">
+                <option value="">-- Select Task --</option>
+            </select>
+        </div>
+
+        <!-- Main Status Row -->
+        <div class="grid grid-5" style="margin-bottom: 15px;">
+            <!-- Task Status -->
+            <div class="card">
+                <h2>📋 Status</h2>
+                <div id="statusContent">
+                    <div class="status-row"><span class="status-label">Status</span><span class="status-value" id="statusValue">IDLE</span></div>
+                    <div class="status-row"><span class="status-label">Task</span><span class="status-value" id="taskName">None</span></div>
+                    <div class="status-row"><span class="status-label">Workflow</span><span class="status-value" id="workflowValue">-</span></div>
+                    <div class="status-row"><span class="status-label">Stage</span><span class="status-value" id="stageValue">-</span></div>
+                    <div class="status-row"><span class="status-label">Priority</span><span class="status-value" id="priorityValue">-</span></div>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+                    <div class="progress-info"><span id="progressStage">Waiting...</span><span id="progressPercent">0%</span></div>
+                </div>
+                <div class="stages" id="stagesContainer"></div>
+            </div>
+
+            <!-- Time Metrics -->
+            <div class="card">
+                <h2>⏱️ Timeline</h2>
+                <div id="timelineMetrics">
+                    <div class="status-row"><span class="status-label">Created</span><span class="status-value" id="createdTime">-</span></div>
+                    <div class="status-row"><span class="status-label">Started</span><span class="status-value" id="startedTime">-</span></div>
+                    <div class="status-row"><span class="status-label">Est. Completion</span><span class="status-value" id="estimatedTime">-</span></div>
+                    <div class="status-row"><span class="status-label">Completed</span><span class="status-value" id="completedTime">-</span></div>
+                    <div class="status-row"><span class="status-label">Duration</span><span class="status-value" id="durationTime">-</span></div>
+                </div>
+            </div>
+
+            <!-- File Metrics -->
+            <div class="card">
+                <h2>📁 Files</h2>
+                <div id="fileMetrics">
+                    <div class="status-row"><span class="status-label">Created</span><span class="status-value" id="filesCreated">0</span></div>
+                    <div class="status-row"><span class="status-label">Modified</span><span class="status-value" id="filesModified">0</span></div>
+                    <div class="status-row"><span class="status-label">Total</span><span class="status-value" id="filesTotal">0</span></div>
+                </div>
+            </div>
+
+            <!-- Test Metrics -->
+            <div class="card">
+                <h2>🧪 Tests</h2>
+                <div id="testMetrics">
+                    <div class="status-row"><span class="status-label">Passing</span><span class="status-value test-pass" id="testsPassing">0</span></div>
+                    <div class="status-row"><span class="status-label">Failing</span><span class="status-value test-fail" id="testsFailing">0</span></div>
+                    <div class="status-row"><span class="status-label">Total</span><span class="status-value" id="testsTotal">0</span></div>
+                    <div class="status-row"><span class="status-label">Coverage</span><span class="status-value" id="testCoverage">-</span></div>
+                </div>
+            </div>
+
+            <!-- Stage Progress -->
+            <div class="card">
+                <h2>🎯 Progress</h2>
+                <div id="stageProgress">
+                    <div class="status-row"><span class="status-label">Stages Done</span><span class="status-value" id="stagesDone">0/0</span></div>
+                    <div class="status-row"><span class="status-label">Waves Done</span><span class="status-value" id="wavesDone">0/0</span></div>
+                    <div class="status-row"><span class="status-label">Tasks Done</span><span class="status-value" id="planTasksDone">0/0</span></div>
+                    <div class="status-row"><span class="status-label">Agents</span><span class="status-value" id="agentsDone">0/0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Reports Section -->
+        <div class="grid grid-2">
+            <!-- Left Column: Task Details -->
+            <div>
+                <!-- Task Description -->
+                <div class="card" style="margin-bottom: 15px;">
+                    <h2>📝 Task Description</h2>
+                    <div class="description" id="taskDescription">No task selected</div>
+                    <div class="metrics-summary" id="taskBadges"></div>
+                </div>
+
+                <!-- Requirements -->
+                <div class="card" style="margin-bottom: 15px;">
+                    <h2>✅ Requirements</h2>
+                    <div id="requirementsContent">
+                        <div class="empty">No requirements data</div>
+                    </div>
+                </div>
+
+                <!-- Deliverables -->
+                <div class="card" style="margin-bottom: 15px;">
+                    <h2>📦 Deliverables</h2>
+                    <div id="deliverablesContent">
+                        <div class="empty">No deliverables data</div>
+                    </div>
+                </div>
+
+                <!-- Planning Waves -->
+                <div class="card">
+                    <h2>🌊 Implementation Plan</h2>
+                    <div id="planningContent">
+                        <div class="empty">No planning data</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Reports -->
+            <div>
+                <!-- Report Tabs -->
+                <div class="card">
+                    <div class="tabs">
+                        <div class="tab active" onclick="switchTab('test')">🧪 Tests</div>
+                        <div class="tab" onclick="switchTab('quality')">⭐ Quality</div>
+                        <div class="tab" onclick="switchTab('security')">🔒 Security</div>
+                        <div class="tab" onclick="switchTab('performance')">⚡ Performance</div>
+                    </div>
+
+                    <!-- Test Report Tab -->
+                    <div class="tab-content active" id="testTab">
+                        <div class="test-summary" id="testSummary">
+                            <div class="test-stat"><div class="test-stat-value test-pass" id="testPassVal">-</div><div class="test-stat-label">Passed</div></div>
+                            <div class="test-stat"><div class="test-stat-value test-fail" id="testFailVal">-</div><div class="test-stat-label">Failed</div></div>
+                            <div class="test-stat"><div class="test-stat-value test-skip" id="testSkipVal">-</div><div class="test-stat-label">Skipped</div></div>
+                            <div class="test-stat"><div class="test-stat-value" id="testTotalVal">-</div><div class="test-stat-label">Total</div></div>
+                        </div>
+                        <h3>Coverage</h3>
+                        <div class="coverage-grid" id="coverageGrid">
+                            <div class="empty">No coverage data</div>
+                        </div>
+                        <h3 style="margin-top: 10px;">Acceptance Criteria</h3>
+                        <div class="scrollable-sm" id="acceptanceCriteria">
+                            <div class="empty">No acceptance criteria data</div>
+                        </div>
+                        <h3 style="margin-top: 10px;">Test Results</h3>
+                        <div class="scrollable" id="testResults">
+                            <div class="empty">No test results data</div>
+                        </div>
+                    </div>
+
+                    <!-- Quality Report Tab -->
+                    <div class="tab-content" id="qualityTab">
+                        <div class="stats-row" id="qualityStats">
+                            <div class="stat-card"><div class="stat-card-value" id="qualityScore">-</div><div class="stat-card-label">Score</div></div>
+                            <div class="stat-card"><div class="stat-card-value" id="qualityVerdict">-</div><div class="stat-card-label">Verdict</div></div>
+                            <div class="stat-card"><div class="stat-card-value" id="qualityIssues">-</div><div class="stat-card-label">Issues</div></div>
+                            <div class="stat-card"><div class="stat-card-value" id="qualityRec">-</div><div class="stat-card-label">Recommend</div></div>
+                        </div>
+                        <h3>Quality Checks</h3>
+                        <div id="qualityChecks">
+                            <div class="empty">No quality check data</div>
+                        </div>
+                        <h3 style="margin-top: 10px;">Issues Found</h3>
+                        <div class="scrollable-sm" id="qualityIssuesList">
+                            <div class="empty">No issues</div>
+                        </div>
+                    </div>
+
+                    <!-- Security Report Tab -->
+                    <div class="tab-content" id="securityTab">
+                        <div class="security-score-display" id="securityScoreDisplay">
+                            <div class="security-score-value" id="securityScore">-</div>
+                            <div class="security-score-label">Security Score</div>
+                        </div>
+                        <div class="stats-row" id="securityStats">
+                            <div class="stat-card"><div class="stat-card-value test-fail" id="secCritical">0</div><div class="stat-card-label">Critical</div></div>
+                            <div class="stat-card"><div class="stat-card-value" style="color: #f97316;" id="secHigh">0</div><div class="stat-card-label">High</div></div>
+                            <div class="stat-card"><div class="stat-card-value test-skip" id="secMedium">0</div><div class="stat-card-label">Medium</div></div>
+                            <div class="stat-card"><div class="stat-card-value test-pass" id="secLow">0</div><div class="stat-card-label">Low</div></div>
+                        </div>
+                        <h3>Security Checks</h3>
+                        <div class="check-grid" id="securityChecks">
+                            <div class="empty">No security check data</div>
+                        </div>
+                        <h3 style="margin-top: 10px;">Compliance</h3>
+                        <div id="complianceInfo">
+                            <div class="empty">No compliance data</div>
+                        </div>
+                        <h3 style="margin-top: 10px;">Best Practices</h3>
+                        <div class="scrollable-sm" id="bestPractices">
+                            <div class="empty">No best practices data</div>
+                        </div>
+                    </div>
+
+                    <!-- Performance Report Tab -->
+                    <div class="tab-content" id="performanceTab">
+                        <h3>Benchmarks</h3>
+                        <div id="benchmarks">
+                            <div class="empty">No benchmark data</div>
+                        </div>
+                        <h3 style="margin-top: 10px;">Optimizations Applied</h3>
+                        <div class="scrollable-sm" id="optimizations">
+                            <div class="empty">No optimization data</div>
+                        </div>
+                        <h3 style="margin-top: 10px;">Bottlenecks</h3>
+                        <div class="scrollable-sm" id="bottlenecks">
+                            <div class="empty">No bottleneck data</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Section: Logs and Checkpoints -->
+        <div class="grid grid-3" style="margin-top: 15px;">
+            <!-- Checkpoints -->
+            <div class="card">
+                <h2>🔖 Checkpoints</h2>
+                <div class="checkpoints-container" id="checkpoints"><div class="empty">No checkpoints yet</div></div>
+            </div>
+
+            <!-- Execution Log -->
+            <div class="card">
+                <h2>📜 Execution Log</h2>
+                <div class="timeline" id="timeline"><div class="empty">No log entries yet</div></div>
+            </div>
+
+            <!-- Overall Quality Score -->
+            <div class="card">
+                <h2>⭐ Overall Quality</h2>
+                <div id="overallQualityContent">
+                    <div class="total-score">
+                        <div class="value" id="totalScoreValue">-</div>
+                        <div class="label">out of 100</div>
+                    </div>
+                </div>
+                <div id="qualityScores" style="margin-top: 15px;">
+                    <div class="empty">No quality metrics yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // All available stages with their metadata
+        const ALL_STAGES = [
+            { id: 'REQUIREMENTS', name: 'Requirements', icon: '📝', workflow: 'full' },
+            { id: 'PLANNING', name: 'Planning', icon: '📋', workflow: 'standard' },
+            { id: 'IMPLEMENTATION', name: 'Implementation', icon: '💻', workflow: 'quick' },
+            { id: 'VERIFICATION', name: 'Verification', icon: '🧪', workflow: 'quick' },
+            { id: 'REVIEW', name: 'Review', icon: '👀', workflow: 'standard' },
+            { id: 'QUALITY_CHECK', name: 'Quality', icon: '✅', workflow: 'full' },
+            { id: 'REFACTOR', name: 'Refactor', icon: '🔧', workflow: 'full' },
+            { id: 'PERFORMANCE', name: 'Performance', icon: '⚡', workflow: 'full' },
+            { id: 'SECURITY', name: 'Security', icon: '🔒', workflow: 'standard' },
+            { id: 'DEPLOY', name: 'Deploy', icon: '🚀', workflow: 'standard' }
+        ];
+
+        const WORKFLOW_STAGES = {
+            'quick': ['IMPLEMENTATION', 'VERIFICATION'],
+            'standard': ['PLANNING', 'IMPLEMENTATION', 'VERIFICATION', 'REVIEW', 'SECURITY', 'DEPLOY'],
+            'full': ['REQUIREMENTS', 'PLANNING', 'IMPLEMENTATION', 'VERIFICATION', 'REVIEW', 'QUALITY_CHECK', 'REFACTOR', 'PERFORMANCE', 'SECURITY', 'DEPLOY']
+        };
+
+        const STAGE_NUMBERS = { 'REQUIREMENTS': 1, 'PLANNING': 2, 'IMPLEMENTATION': 3, 'VERIFICATION': 4, 'REVIEW': 5, 'QUALITY_CHECK': 6, 'REFACTOR': 7, 'PERFORMANCE': 8, 'SECURITY': 9, 'DEPLOY': 10 };
+
+        const AGENT_ICONS = {
+            ORCHESTRATOR: '🎭', REQUIREMENTS_GATHERER: '📋', 'REQUIREMENTS-GATHERER': '📋', PLANNER: '🔮', CRITIC: '⚠️',
+            SYNTHESIZER: '⚖️', CODER: '💻', TESTER: '🧪', REVIEWER: '👀',
+            'QUALITY-TYPE-SAFETY': '🔒', 'QUALITY-VALIDATION': '✅', 'QUALITY-ERROR-HANDLING': '🛡️',
+            'QUALITY-API-CONSISTENCY': '🔗', 'QUALITY-DATABASE': '🗄️', 'QUALITY-FILE-SIZE': '📏',
+            REFACTOR: '🔧', PERFORMANCE: '⚡', SECURITY: '🔒', DEPLOY: '🚀'
+        };
+
+        let selectedTaskId = null;
+        let currentReports = {};
+
+        function getData() {
+            return window.DASHBOARD_DATA || { queue: { tasks: [], statistics: {}, updatedAt: null }, tasks: {} };
+        }
+
+        function formatTimestamp(isoString) { if (!isoString) return 'Never'; try { return new Date(isoString).toLocaleString(); } catch (e) { return isoString; } }
+        function formatTime(isoString) { if (!isoString) return '--:--'; try { return new Date(isoString).toLocaleTimeString(); } catch (e) { return isoString; } }
+        function formatDate(isoString) { if (!isoString) return '-'; try { return new Date(isoString).toLocaleDateString(); } catch (e) { return isoString; } }
+        function formatDuration(startTime, endTime) {
+            if (!startTime) return '-';
+            const start = new Date(startTime);
+            const end = endTime ? new Date(endTime) : new Date();
+            const diff = Math.floor((end - start) / 60000);
+            if (diff < 60) return `${diff}m`;
+            const hrs = Math.floor(diff / 60);
+            const mins = diff % 60;
+            return `${hrs}h ${mins}m`;
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        function selectTask(taskId) {
+            selectedTaskId = taskId || null;
+            render();
+        }
+
+        function getActiveTaskId(data) {
+            if (selectedTaskId) return selectedTaskId;
+            const tasks = data.queue.tasks || [];
+            if (tasks.length === 0) return null;
+            const inProgress = tasks.find(t => t.status === 'in_progress');
+            if (inProgress) return inProgress.id;
+            return tasks[0].id;
+        }
+
+        function getCurrentTaskData(data) {
+            const taskId = getActiveTaskId(data);
+            return taskId ? data.tasks[taskId] : null;
+        }
+
+        function loadReports(taskId) {
+            currentReports = { test: null, quality: null, security: null, performance: null, review: null };
+            if (!taskId) return;
+
+            // Load reports from embedded data.js (bypasses CORS when using file:// protocol)
+            const data = getData();
+            const taskReports = data.tasks[taskId]?.reports;
+
+            if (taskReports) {
+                currentReports.test = taskReports.test || null;
+                currentReports.quality = taskReports.quality || null;
+                currentReports.security = taskReports.security || null;
+                currentReports.performance = taskReports.performance || null;
+                currentReports.review = taskReports.review || null;
+            }
+
+            // Also try to fetch from files (works when served via HTTP)
+            const reportFiles = [
+                { name: 'test', path: `session/tasks/${taskId}/reports/test-report.json` },
+                { name: 'quality', path: `session/tasks/${taskId}/reports/quality-report.json` },
+                { name: 'security', path: `session/tasks/${taskId}/reports/security-report.json` },
+                { name: 'performance', path: `session/tasks/${taskId}/reports/performance-report.json` },
+                { name: 'review', path: `session/tasks/${taskId}/reports/review-report.json` }
+            ];
+
+            reportFiles.forEach(report => {
+                fetch(report.path + '?v=' + Date.now())
+                    .then(r => r.json())
+                    .then(data => { currentReports[report.name] = data; renderReports(); })
+                    .catch(() => {}); // Silently fail - embedded data will be used
+            });
+        }
+
+        function render() {
+            const data = getData();
+            const taskData = getCurrentTaskData(data);
+            const taskId = getActiveTaskId(data);
+
+            // Load reports for current task
+            if (taskId && taskId !== lastTaskId) {
+                lastTaskId = taskId;
+                loadReports(taskId);
+            }
+
+            // Header stats
+            const tasks = data.queue.tasks || [];
+            document.getElementById('totalTasks').textContent = tasks.length;
+            document.getElementById('completedTasks').textContent = tasks.filter(t => t.status === 'completed').length;
+            document.getElementById('activeTasks').textContent = tasks.filter(t => t.status === 'in_progress').length;
+            document.getElementById('lastUpdated').textContent = data.queue.updatedAt ? `Updated: ${formatTimestamp(data.queue.updatedAt)}` : 'Never updated';
+
+            // Task selector
+            const selectorContainer = document.getElementById('taskSelectorContainer');
+            const taskSelector = document.getElementById('taskSelector');
+            if (tasks.length > 1) {
+                selectorContainer.style.display = 'block';
+                taskSelector.innerHTML = '<option value="">-- Select Task --</option>' +
+                    tasks.map(t => `<option value="${t.id}" ${t.id === taskId ? 'selected' : ''}>${t.name || t.id} (${t.status})</option>`).join('');
+            } else {
+                selectorContainer.style.display = 'none';
+            }
+
+            renderStatus(taskData, data);
+            renderStages(taskData, data);
+            renderTimeline(taskData);
+            renderFiles(taskData);
+            renderTests(taskData);
+            renderStageProgress(taskData);
+            renderTaskDetails(taskData);
+            renderPlanning(taskData);
+            renderCheckpoints(taskData);
+            renderLog(taskData);
+            renderOverallQuality(taskData);
+            renderReports();
+        }
+
+        let lastTaskId = null;
+
+        function renderStatus(taskData, data) {
+            if (!taskData || !taskData.state) {
+                ['statusValue', 'taskName', 'workflowValue', 'stageValue', 'priorityValue'].forEach(id => {
+                    document.getElementById(id).textContent = ['statusValue', 'taskName'].includes(id) ? 'IDLE' : '-';
+                    if (id === 'statusValue') document.getElementById(id).className = 'status-value idle';
+                });
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('progressPercent').textContent = '0%';
+                document.getElementById('progressStage').textContent = 'Waiting...';
+                return;
+            }
+
+            const state = taskData.state;
+            const status = state.status || 'idle';
+            document.getElementById('statusValue').textContent = status.toUpperCase();
+            document.getElementById('statusValue').className = 'status-value ' + status;
+            document.getElementById('taskName').textContent = state.name || state.taskId || 'Unknown';
+
+            const taskId = state.taskId;
+            const queueTask = (data.queue.tasks || []).find(t => t.id === taskId);
+            const workflow = queueTask?.workflow || state.workflow || 'standard';
+            document.getElementById('workflowValue').textContent = workflow.toUpperCase();
+            document.getElementById('stageValue').textContent = state.currentStage?.name || state.currentStage || 'IDLE';
+
+            const priority = state.priority || queueTask?.priority || 'medium';
+            document.getElementById('priorityValue').innerHTML = `<span class="badge badge-${priority}">${priority}</span>`;
+
+            document.getElementById('progressFill').style.width = `${state.progress || 0}%`;
+            document.getElementById('progressPercent').textContent = `${state.progress || 0}%`;
+            document.getElementById('progressStage').textContent = state.currentStage?.name || state.currentStage || 'Waiting...';
+        }
+
+        function renderStages(taskData, data) {
+            const container = document.getElementById('stagesContainer');
+            if (!taskData || !taskData.state) {
+                container.innerHTML = ALL_STAGES.map(s => `<span class="stage pending" style="opacity: 0.5;">${s.icon} ${s.name}</span>`).join('');
+                return;
+            }
+
+            const taskId = taskData.state.taskId;
+            const queueTask = (data.queue.tasks || []).find(t => t.id === taskId);
+            const workflow = queueTask?.workflow || taskData.state.workflow || 'standard';
+            const workflowStageIds = WORKFLOW_STAGES[workflow] || WORKFLOW_STAGES['standard'];
+            const relevantStages = ALL_STAGES.filter(s => workflowStageIds.includes(s.id));
+
+            const currentStage = taskData.state.currentStage?.name || taskData.state.currentStage;
+            const currentStageNum = workflowStageIds.indexOf(currentStage) + 1;
+            const status = taskData.state.status;
+
+            container.innerHTML = relevantStages.map((stage, i) => {
+                const stageNum = i + 1;
+                let cls = 'pending';
+                if (status === 'completed' || stageNum < currentStageNum) cls = 'complete';
+                else if (stageNum === currentStageNum && currentStageNum > 0) cls = 'in_progress';
+                return `<span class="stage ${cls}">${stage.icon} ${stage.name}</span>`;
+            }).join('');
+        }
+
+        function renderTimeline(taskData) {
+            if (!taskData || !taskData.state) {
+                ['createdTime', 'startedTime', 'estimatedTime', 'completedTime', 'durationTime'].forEach(id => {
+                    document.getElementById(id).textContent = '-';
+                });
+                return;
+            }
+
+            const state = taskData.state;
+            document.getElementById('createdTime').textContent = formatTime(state.createdAt);
+            document.getElementById('startedTime').textContent = formatTime(state.startedAt);
+            document.getElementById('estimatedTime').textContent = formatTime(state.estimatedCompletion);
+            document.getElementById('completedTime').textContent = formatTime(state.completedAt);
+            document.getElementById('durationTime').textContent = formatDuration(state.startedAt, state.completedAt);
+        }
+
+        function renderFiles(taskData) {
+            if (!taskData || !taskData.state || !taskData.state.metrics) {
+                ['filesCreated', 'filesModified', 'filesTotal'].forEach(id => document.getElementById(id).textContent = '0');
+                return;
+            }
+
+            const metrics = taskData.state.metrics;
+            const created = metrics.filesCreated || 0;
+            const modified = metrics.filesModified || 0;
+            document.getElementById('filesCreated').textContent = created;
+            document.getElementById('filesModified').textContent = modified;
+            document.getElementById('filesTotal').textContent = created + modified;
+        }
+
+        function renderTests(taskData) {
+            if (!taskData || !taskData.state || !taskData.state.metrics) {
+                ['testsPassing', 'testsFailing', 'testsTotal'].forEach(id => document.getElementById(id).textContent = '0');
+                document.getElementById('testCoverage').textContent = '-';
+                return;
+            }
+
+            const metrics = taskData.state.metrics;
+            const passing = metrics.testsPassing || metrics.testsPassed || 0;
+            const failing = metrics.testsFailing || metrics.testsFailed || 0;
+            const total = passing + failing;
+
+            document.getElementById('testsPassing').textContent = passing;
+            document.getElementById('testsFailing').textContent = failing;
+            document.getElementById('testsTotal').textContent = total;
+            document.getElementById('testCoverage').textContent = total > 0 ? `${Math.round((passing / total) * 100)}%` : '-';
+        }
+
+        function renderStageProgress(taskData) {
+            if (!taskData || !taskData.state) {
+                ['stagesDone', 'wavesDone', 'planTasksDone', 'agentsDone'].forEach(id => document.getElementById(id).textContent = '0/0');
+                return;
+            }
+
+            const state = taskData.state;
+            const metrics = state.metrics || {};
+            const stagesCompleted = metrics.stagesCompleted || 0;
+            const totalStages = metrics.totalStages || WORKFLOW_STAGES[state.workflow || 'standard'].length;
+
+            document.getElementById('stagesDone').textContent = `${stagesCompleted}/${totalStages}`;
+
+            // Calculate wave progress from plan
+            let wavesCompleted = 0, totalWaves = 0;
+            let tasksCompleted = 0, totalTasks = 0;
+            if (taskData.plan && taskData.plan.waves) {
+                totalWaves = taskData.plan.waves.length;
+                taskData.plan.waves.forEach(wave => {
+                    totalTasks += wave.tasks ? wave.tasks.length : 0;
+                    if (wave.tasks) {
+                        const waveComplete = wave.tasks.every(t => t.status === 'complete');
+                        if (waveComplete) wavesCompleted++;
+                        tasksCompleted += wave.tasks.filter(t => t.status === 'complete').length;
+                    }
+                });
+            }
+            document.getElementById('wavesDone').textContent = `${wavesCompleted}/${totalWaves}`;
+            document.getElementById('planTasksDone').textContent = `${tasksCompleted}/${totalTasks}`;
+
+            // Agent progress
+            const agents = state.agents || {};
+            const completedAgents = (agents.completed || []).length;
+            const totalAgents = completedAgents + (agents.pending || []).length;
+            document.getElementById('agentsDone').textContent = `${completedAgents}/${totalAgents}`;
+        }
+
+        function renderTaskDetails(taskData) {
+            if (!taskData || !taskData.state) {
+                document.getElementById('taskDescription').textContent = 'No task selected';
+                document.getElementById('taskBadges').innerHTML = '';
+                document.getElementById('requirementsContent').innerHTML = '<div class="empty">No requirements data</div>';
+                document.getElementById('deliverablesContent').innerHTML = '<div class="empty">No deliverables data</div>';
+                return;
+            }
+
+            const state = taskData.state;
+            document.getElementById('taskDescription').textContent = state.description || 'No description';
+
+            // Badges
+            const priority = state.priority || 'medium';
+            const complexity = state.complexity || 'simple';
+            document.getElementById('taskBadges').innerHTML = `
+                <span class="metric-pill"><span class="metric-pill-label">Priority:</span><span class="badge badge-${priority}">${priority}</span></span>
+                <span class="metric-pill"><span class="metric-pill-label">Complexity:</span><span class="badge badge-${complexity === 'complex' ? 'complex' : 'simple'}">${complexity}</span></span>
+            `;
+
+            // Requirements
+            const reqs = state.requirements;
+            if (reqs) {
+                let reqHtml = '';
+                if (reqs.functional && reqs.functional.length) {
+                    reqHtml += '<h4 style="font-size: 0.8rem; color: var(--muted); margin: 8px 0 4px;">Functional</h4>';
+                    reqHtml += '<ul class="req-list">' + reqs.functional.map(r => `<li class="req-item"><span class="req-bullet">•</span><span class="req-text">${r}</span></li>`).join('') + '</ul>';
+                }
+                if (reqs.nonFunctional && reqs.nonFunctional.length) {
+                    reqHtml += '<h4 style="font-size: 0.8rem; color: var(--muted); margin: 8px 0 4px;">Non-Functional</h4>';
+                    reqHtml += '<ul class="req-list">' + reqs.nonFunctional.map(r => `<li class="req-item"><span class="req-bullet">•</span><span class="req-text">${r}</span></li>`).join('') + '</ul>';
+                }
+                document.getElementById('requirementsContent').innerHTML = reqHtml || '<div class="empty">No requirements</div>';
+            } else {
+                document.getElementById('requirementsContent').innerHTML = '<div class="empty">No requirements data</div>';
+            }
+
+            // Deliverables
+            const deliverables = state.deliverables;
+            if (deliverables && deliverables.length) {
+                document.getElementById('deliverablesContent').innerHTML = '<ul class="req-list">' + deliverables.map(d => `<li class="req-item"><span class="req-bullet">📦</span><span class="req-text">${d}</span></li>`).join('') + '</ul>';
+            } else {
+                document.getElementById('deliverablesContent').innerHTML = '<div class="empty">No deliverables data</div>';
+            }
+        }
+
+        function renderPlanning(taskData) {
+            if (!taskData || !taskData.state || !taskData.state.plan) {
+                document.getElementById('planningContent').innerHTML = '<div class="empty">No planning data</div>';
+                return;
+            }
+
+            const plan = taskData.state.plan;
+            let html = '';
+
+            // Plan summary
+            if (plan.perspectives) {
+                const synth = plan.perspectives.synthesized;
+                if (synth) {
+                    html += `<div class="report-grid">`;
+                    html += `<div class="report-item"><span class="report-item-label">Total Tasks</span><span class="report-item-value">${synth.finalTaskCount || plan.waves?.reduce((a, w) => a + (w.tasks?.length || 0), 0) || 0}</span></div>`;
+                    html += `<div class="report-item"><span class="report-item-label">Waves</span><span class="report-item-value">${plan.waves?.length || 0}</span></div>`;
+                    html += `<div class="report-item"><span class="report-item-label">Est. Duration</span><span class="report-item-value">${plan.estimatedDuration || '-'}</span></div>`;
+                    html += `</div>`;
+                }
+            }
+
+            // Waves visualization
+            if (plan.waves && plan.waves.length) {
+                html += '<div class="wave-timeline">';
+                plan.waves.forEach((wave, i) => {
+                    const isComplete = wave.tasks && wave.tasks.every(t => t.status === 'complete');
+                    html += `<div class="wave ${isComplete ? 'complete' : 'pending'}" title="${wave.name}">${i + 1}</div>`;
+                });
+                html += '</div>';
+
+                html += '<div class="scrollable" style="max-height: 200px; margin-top: 10px;">';
+                plan.waves.forEach((wave, i) => {
+                    const completedTasks = wave.tasks ? wave.tasks.filter(t => t.status === 'complete').length : 0;
+                    const totalTasks = wave.tasks ? wave.tasks.length : 0;
+                    html += `<div style="margin-bottom: 8px; padding: 8px; background: rgba(255,255,255,0.03); border-radius: 6px;">`;
+                    html += `<div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 4px;">`;
+                    html += `<span style="font-weight: 600;">Wave ${i + 1}: ${wave.name || ''}</span>`;
+                    html += `<span style="color: var(--muted);">${completedTasks}/${totalTasks} tasks</span>`;
+                    html += `</div>`;
+                    html += `<div style="font-size: 0.75rem; color: var(--muted);">${wave.description || ''}</div>`;
+                    html += `</div>`;
+                });
+                html += '</div>';
+            }
+
+            document.getElementById('planningContent').innerHTML = html || '<div class="empty">No planning data</div>';
+        }
+
+        function renderCheckpoints(taskData) {
+            const container = document.getElementById('checkpoints');
+            if (!taskData || !taskData.checkpoints || !taskData.checkpoints.checkpoints || taskData.checkpoints.checkpoints.length === 0) {
+                container.innerHTML = '<div class="empty">No checkpoints yet</div>';
+                return;
+            }
+
+            container.innerHTML = taskData.checkpoints.checkpoints.slice().reverse().map(cp => {
+                const stageInfo = cp.stageNumber ? `Stage ${cp.stageNumber}` : cp.stage || 'Complete';
+                return `
+                <div class="checkpoint">
+                    <div class="checkpoint-name">${cp.name || cp.stage || 'Unknown'}</div>
+                    <div class="checkpoint-meta">${stageInfo} • ${formatTimestamp(cp.timestamp)}</div>
+                </div>
+            `}).join('');
+        }
+
+        function renderLog(taskData) {
+            const container = document.getElementById('timeline');
+            if (!taskData || !taskData.log || !taskData.log.entries || taskData.log.entries.length === 0) {
+                container.innerHTML = '<div class="empty">No log entries yet</div>';
+                return;
+            }
+
+            container.innerHTML = taskData.log.entries.slice(-30).reverse().map(entry => `
+                <div class="entry">
+                    <div class="entry-time">${formatTime(entry.timestamp)}</div>
+                    <div class="entry-icon">${AGENT_ICONS[entry.agent] || '🤖'}</div>
+                    <div class="entry-content">
+                        <div class="entry-agent">${entry.agent || 'SYSTEM'}</div>
+                        <div class="entry-action">${entry.action || ''}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderOverallQuality(taskData) {
+            if (!taskData || !taskData.state || !taskData.state.metrics) {
+                document.getElementById('totalScoreValue').textContent = '-';
+                document.getElementById('qualityScores').innerHTML = '<div class="empty">No quality metrics yet</div>';
+                return;
+            }
+
+            const metrics = taskData.state.metrics;
+            const items = [];
+
+            if (metrics.testsPassing !== undefined || metrics.testsPassed !== undefined) {
+                const passing = metrics.testsPassing || metrics.testsPassed || 0;
+                const failing = metrics.testsFailing || metrics.testsFailed || 0;
+                const total = passing + failing;
+                const pct = total > 0 ? Math.round((passing / total) * 100) : 0;
+                items.push({ name: 'Tests', score: Math.round(pct / 10), value: `${passing}/${total} passed`, color: pct >= 80 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : 'var(--danger)' });
+            }
+            if (metrics.filesCreated !== undefined || metrics.filesModified !== undefined) {
+                const total = (metrics.filesCreated || 0) + (metrics.filesModified || 0);
+                items.push({ name: 'Files', score: Math.min(10, total), value: `${total} files`, color: 'var(--info)' });
+            }
+            if (metrics.stagesCompleted !== undefined && metrics.totalStages !== undefined) {
+                const pct = metrics.totalStages > 0 ? Math.round((metrics.stagesCompleted / metrics.totalStages) * 100) : 0;
+                items.push({ name: 'Stages', score: Math.round(pct / 10), value: `${metrics.stagesCompleted}/${metrics.totalStages}`, color: 'var(--primary)' });
+            }
+
+            if (items.length === 0) {
+                document.getElementById('totalScoreValue').textContent = '-';
+                document.getElementById('qualityScores').innerHTML = '<div class="empty">No quality metrics yet</div>';
+                return;
+            }
+
+            const totalScore = Math.round((items.reduce((sum, item) => sum + item.score, 0) / (items.length * 10)) * 100);
+            document.getElementById('totalScoreValue').textContent = totalScore;
+
+            document.getElementById('qualityScores').innerHTML = items.map(item => {
+                const pct = item.score * 10;
+                return `<div class="quality-item"><div class="quality-header"><span>${item.name}</span><span>${item.value}</span></div><div class="quality-bar"><div class="quality-fill" style="width: ${pct}%; background: ${item.color}"></div></div></div>`;
+            }).join('');
+        }
+
+        function renderReports() {
+            // Test Report
+            if (currentReports.test) {
+                const r = currentReports.test;
+                document.getElementById('testPassVal').textContent = r.summary?.passed || 0;
+                document.getElementById('testFailVal').textContent = r.summary?.failed || 0;
+                document.getElementById('testSkipVal').textContent = r.summary?.skipped || 0;
+                document.getElementById('testTotalVal').textContent = r.summary?.totalTests || 0;
+
+                // Coverage
+                const cov = r.coverage;
+                if (cov) {
+                    document.getElementById('coverageGrid').innerHTML = `
+                        <div class="coverage-item"><div class="coverage-label">Functional Req</div><div class="coverage-bar"><div class="coverage-fill" style="width: ${cov.functionalRequirements || 0}%; background: var(--success);"></div></div><div style="text-align: right; font-size: 0.7rem; margin-top: 2px;">${cov.functionalRequirementsMet || 0}/${cov.functionalRequirements || 0}</div></div>
+                        <div class="coverage-item"><div class="coverage-label">Acceptance</div><div class="coverage-bar"><div class="coverage-fill" style="width: ${(cov.acceptanceCriteriaMet || 0) / (cov.acceptanceCriteria || 1) * 100}%; background: var(--primary);"></div></div><div style="text-align: right; font-size: 0.7rem; margin-top: 2px;">${cov.acceptanceCriteriaMet || 0}/${cov.acceptanceCriteria || 0}</div></div>
+                        <div class="coverage-item"><div class="coverage-label">Security</div><div class="coverage-bar"><div class="coverage-fill" style="width: ${(cov.securityFeaturesMet || 0) / (cov.securityFeatures || 1) * 100}%; background: var(--warning);"></div></div><div style="text-align: right; font-size: 0.7rem; margin-top: 2px;">${cov.securityFeaturesMet || 0}/${cov.securityFeatures || 0}</div></div>
+                        <div class="coverage-item"><div class="coverage-label">Lines</div><div class="coverage-bar"><div class="coverage-fill" style="width: ${cov.lines || 0}%; background: var(--info);"></div></div><div style="text-align: right; font-size: 0.7rem; margin-top: 2px;">${cov.lines || 0}%</div></div>
+                    `;
+                }
+
+                // Acceptance Criteria
+                if (r.acceptanceCriteria && r.acceptanceCriteria.length) {
+                    document.getElementById('acceptanceCriteria').innerHTML = r.acceptanceCriteria.map(ac => `
+                        <div class="report-item" style="margin-bottom: 4px;">
+                            <span style="font-size: 0.75rem;">${ac.criterion}</span>
+                            <span class="report-item-value ${ac.status === 'passed' ? 'pass' : 'fail'}">${ac.status}</span>
+                        </div>
+                    `).join('');
+                }
+
+                // Test Results
+                if (r.tests && r.tests.length) {
+                    document.getElementById('testResults').innerHTML = r.tests.map(t => `
+                        <div class="entry" style="padding: 6px 0;">
+                            <div class="entry-time">${t.type || 'unit'}</div>
+                            <div class="entry-icon">${t.status === 'passed' ? '✅' : t.status === 'failed' ? '❌' : '⏭️'}</div>
+                            <div class="entry-content">
+                                <div class="entry-action" style="font-size: 0.75rem;">${t.name}</div>
+                                ${t.file ? `<div style="font-size: 0.7rem; color: var(--muted);">${t.file}</div>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // Quality Report
+            if (currentReports.quality) {
+                const r = currentReports.quality;
+                document.getElementById('qualityScore').textContent = r.summary?.overallScore || r.overallScore || '-';
+                document.getElementById('qualityVerdict').textContent = r.summary?.verdict || r.verdict || '-';
+                document.getElementById('qualityIssues').textContent = r.summary?.totalIssues || r.issues?.length || 0;
+                document.getElementById('qualityRec').textContent = r.recommendations?.length ? (r.summary?.verdict === 'PASS' ? 'PROCEED' : 'REVIEW') : (r.recommendation || '-');
+
+                // Quality checks
+                if (r.checks) {
+                    document.getElementById('qualityChecks').innerHTML = Object.entries(r.checks).map(([name, check]) => `
+                        <div class="report-item" style="margin-bottom: 4px; padding: 6px;">
+                            <span class="report-item-label" style="font-size: 0.75rem; text-transform: capitalize;">${name.replace(/([A-Z])/g, ' $1').trim()}</span>
+                            <span class="report-item-value ${check.status === 'pass' ? 'pass' : 'fail'}">${check.score || 0}/10</span>
+                        </div>
+                    `).join('');
+                }
+
+                // Issues
+                if (r.issues && r.issues.length) {
+                    document.getElementById('qualityIssuesList').innerHTML = r.issues.map(issue => `
+                        <div class="issue-item">
+                            <span class="issue-severity ${issue.severity}">${issue.severity}</span>
+                            <span class="issue-desc">${issue.description}</span>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            // Security Report
+            if (currentReports.security) {
+                const r = currentReports.security;
+                document.getElementById('securityScore').textContent = r.summary?.overallSecurityScore || '-';
+                document.getElementById('secCritical').textContent = r.summary?.criticalIssues || 0;
+                document.getElementById('secHigh').textContent = r.summary?.highIssues || 0;
+                document.getElementById('secMedium').textContent = r.summary?.mediumIssues || 0;
+                document.getElementById('secLow').textContent = r.summary?.lowIssues || 0;
+
+                // Security checks
+                if (r.checks) {
+                    document.getElementById('securityChecks').innerHTML = Object.entries(r.checks).map(([name, check]) => `
+                        <div class="check-item">
+                            <div class="check-icon ${check.status === 'pass' ? 'pass' : 'fail'}">${check.status === 'pass' ? '✓' : '✗'}</div>
+                            <span style="text-transform: capitalize; font-size: 0.7rem;">${name.replace(/([A-Z])/g, ' $1').trim()}</span>
+                        </div>
+                    `).join('');
+                }
+
+                // Compliance
+                if (r.compliance) {
+                    document.getElementById('complianceInfo').innerHTML = Object.entries(r.compliance).map(([name, c]) => `
+                        <div class="report-item" style="margin-bottom: 4px;">
+                            <span class="report-item-label" style="font-size: 0.8rem;">${name.toUpperCase()}</span>
+                            <span class="report-item-value ${c.status === 'compliant' || c.status === 'pass' ? 'pass' : c.status === 'partial' ? 'warning' : 'fail'}">${c.status}</span>
+                        </div>
+                    `).join('');
+                }
+
+                // Best practices
+                if (r.bestPractices && r.bestPractices.length) {
+                    document.getElementById('bestPractices').innerHTML = '<ul class="req-list">' + r.bestPractices.map(bp => `<li class="req-item"><span class="req-bullet">✓</span><span class="req-text">${bp}</span></li>`).join('') + '</ul>';
+                }
+            }
+
+            // Performance Report
+            if (currentReports.performance) {
+                const r = currentReports.performance;
+
+                // Benchmarks
+                if (r.benchmarks && r.benchmarks.length) {
+                    document.getElementById('benchmarks').innerHTML = r.benchmarks.map(b => `
+                        <div class="report-item" style="margin-bottom: 6px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.8rem;">${b.name}</div>
+                                <div style="font-size: 0.7rem; color: var(--muted);">${b.before} → ${b.after} ${b.unit}</div>
+                            </div>
+                            <span class="report-item-value ${b.status === 'improved' ? 'pass' : b.status === 'regressed' ? 'fail' : 'info'}">${b.improvementPercent !== null ? (b.improvementPercent > 0 ? '+' : '') + b.improvementPercent + '%' : '-'}</span>
+                        </div>
+                    `).join('');
+                }
+
+                // Optimizations
+                if (r.optimizations && r.optimizations.length) {
+                    document.getElementById('optimizations').innerHTML = r.optimizations.map(opt => `
+                        <div class="checkpoint" style="border-left-color: var(--info);">
+                            <div class="checkpoint-name">${opt.description}</div>
+                            <div class="checkpoint-meta">${opt.type} • ${opt.files?.join(', ') || ''}</div>
+                        </div>
+                    `).join('');
+                }
+
+                // Bottlenecks
+                if (r.bottlenecks && r.bottlenecks.length) {
+                    document.getElementById('bottlenecks').innerHTML = r.bottlenecks.map(b => `
+                        <div class="report-item" style="margin-bottom: 4px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 0.8rem;">${b.location || 'Unknown'}</div>
+                                <div style="font-size: 0.75rem; color: var(--muted);">${b.description}</div>
+                            </div>
+                            <span class="issue-severity ${b.severity}">${b.severity}</span>
+                        </div>
+                    `).join('');
+                }
+            }
+        }
+
+        // Load data and render
+        document.addEventListener('DOMContentLoaded', function() {
+            const script = document.createElement('script');
+            script.src = 'session/data.js?v=' + Date.now();
+            script.onload = function() {
+                console.log('✅ data.js loaded successfully');
+                render();
+                // Auto-refresh every 5 seconds
+                setInterval(render, 5000);
+            };
+            script.onerror = function() {
+                console.error('❌ Failed to load session/data.js');
+                document.getElementById('lastUpdated').textContent = 'Error: Could not load data.js';
+            };
+            document.head.appendChild(script);
+        });
+    </script>
+</body>
+</html>

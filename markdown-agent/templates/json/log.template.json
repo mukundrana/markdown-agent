@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-log.json",
+  "title": "Task Log",
+  "description": "Log entries for a single task",
+  "type": "object",
+  "required": ["taskId", "entries"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^task-[0-9]+$"
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "timestamp", "agent", "stage", "action", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^log-[0-9]+$"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "agent": {
+            "type": "string",
+            "enum": [
+              "ORCHESTRATOR",
+              "REQUIREMENTS-GATHERER",
+              "PLANNER",
+              "CRITIC",
+              "SYNTHESIZER",
+              "CODER",
+              "TESTER",
+              "REVIEWER",
+              "QUALITY_TYPE_SAFETY",
+              "QUALITY_VALIDATION",
+              "QUALITY_ERROR_HANDLING",
+              "QUALITY_API_CONSISTENCY",
+              "QUALITY_DATABASE",
+              "QUALITY_FILE_SIZE",
+              "REFACTOR",
+              "PERFORMANCE",
+              "SECURITY",
+              "DEPLOY",
+              "DEBUGGER",
+              "CHANGELOG"
+            ]
+          },
+          "stage": {
+            "type": "string",
+            "enum": ["INIT", "REQUIREMENTS", "PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "QUALITY_CHECK", "REFACTOR", "PERFORMANCE", "SECURITY", "DEPLOY", "DEBUG", "COMPLETE"]
+          },
+          "action": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": ["success", "failed", "in_progress", "warning", "info"]
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "error": {
+            "type": ["object", "null"],
+            "properties": {
+              "message": {"type": "string"},
+              "code": {"type": "string"},
+              "retryable": {"type": "boolean"}
+            }
+          },
+          "nextAgent": {
+            "type": ["string", "null"],
+            "description": "Next agent to activate"
+          },
+          "files": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Files created or modified"
+          }
+        }
+      }
+    }
+  }
+}

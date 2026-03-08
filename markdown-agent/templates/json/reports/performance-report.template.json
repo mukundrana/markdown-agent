@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "performance-report.json",
+  "title": "Performance Report",
+  "description": "Performance optimization results from PERFORMANCE agent",
+  "type": "object",
+  "required": ["taskId", "generatedAt", "agent", "summary"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^task-[0-9]+$"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "agent": {
+      "type": "string",
+      "const": "PERFORMANCE"
+    },
+    "summary": {
+      "type": "object",
+      "required": ["improved", "regressions", "verdict"],
+      "properties": {
+        "before": {
+          "type": "object",
+          "properties": {
+            "avgResponseTime": {"type": ["string", "null"]},
+            "memoryUsage": {"type": ["string", "null"]},
+            "bundleSize": {"type": ["string", "null"]}
+          }
+        },
+        "after": {
+          "type": "object",
+          "properties": {
+            "avgResponseTime": {"type": ["string", "null"]},
+            "memoryUsage": {"type": ["string", "null"]},
+            "bundleSize": {"type": ["string", "null"]}
+          }
+        },
+        "improved": {"type": "boolean"},
+        "regressions": {"type": "boolean"},
+        "verdict": {
+          "type": "string",
+          "enum": ["pass", "fail", "needs_investigation"]
+        }
+      }
+    },
+    "benchmarks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "before", "after", "unit"],
+        "properties": {
+          "name": {"type": "string"},
+          "before": {"type": "number"},
+          "after": {"type": "number"},
+          "improvement": {"type": ["number", "null"]},
+          "improvementPercent": {"type": ["number", "null"]},
+          "unit": {"type": "string"},
+          "status": {
+            "type": "string",
+            "enum": ["improved", "regressed", "unchanged"]
+          }
+        }
+      }
+    },
+    "optimizations": {
+      "type": "array",
+      "description": "Optimizations applied",
+      "items": {
+        "type": "object",
+        "required": ["type", "description", "files"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "caching",
+              "lazy_loading",
+              "query_optimization",
+              "bundle_optimization",
+              "memoization",
+              "parallelization",
+              "indexing",
+              "algorithm_improvement",
+              "other"
+            ]
+          },
+          "description": {"type": "string"},
+          "files": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "expectedImpact": {"type": "string"},
+          "riskLevel": {
+            "type": "string",
+            "enum": ["low", "medium", "high"]
+          }
+        }
+      }
+    },
+    "bottlenecks": {
+      "type": "array",
+      "description": "Bottlenecks identified (not all may be fixed)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "location": {"type": "string"},
+          "description": {"type": "string"},
+          "severity": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+          "fixed": {"type": "boolean"},
+          "reason": {"type": ["string", "null"]}
+        }
+      }
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": ["proceed", "needs_tuning", "rollback"]
+    }
+  }
+}

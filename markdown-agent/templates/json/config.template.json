@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "session-config.json",
+  "title": "Session Configuration",
+  "description": "Global configuration for the agent session",
+  "type": "object",
+  "required": ["sessionStarted", "project", "settings"],
+  "properties": {
+    "sessionStarted": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "project": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {"type": "string"},
+        "type": {
+          "type": "string",
+          "enum": ["web-application", "api", "cli", "library", "mobile", "desktop", "other"]
+        },
+        "language": {
+          "type": "string",
+          "enum": ["typescript", "javascript", "python", "go", "rust", "java", "csharp", "other"]
+        },
+        "framework": {"type": ["string", "null"]},
+        "rootPath": {"type": "string"}
+      }
+    },
+    "settings": {
+      "type": "object",
+      "properties": {
+        "maxParallelWaves": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3
+        },
+        "retryAttempts": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "default": 3
+        },
+        "defaultWorkflow": {
+          "type": "string",
+          "enum": ["quick", "standard", "full"],
+          "default": "standard"
+        },
+        "qualityThreshold": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 70
+        },
+        "securityCheckRequired": {
+          "type": "boolean",
+          "default": true
+        },
+        "autoDeploy": {
+          "type": "boolean",
+          "default": false
+        },
+        "stopOnFailure": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "workflows": {
+      "type": "object",
+      "description": "Defines stages for each workflow type",
+      "propertyNames": {
+        "type": "array"
+      },
+      "properties": {
+        "quick": {
+          "type": "object",
+          "properties": {
+            "stages": {
+              "type": "array",
+              "items": {"type": "string"},
+              "default": ["IMPLEMENTATION", "VERIFICATION"]
+            },
+            "description": {"type": "string"}
+          }
+        },
+        "standard": {
+          "type": "object",
+          "properties": {
+            "stages": {
+              "type": "array",
+              "items": {"type": "string"},
+              "default": ["PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "SECURITY", "DEPLOY"]
+            },
+            "description": {"type": "string"}
+          }
+        },
+        "full": {
+          "type": "object",
+          "properties": {
+            "stages": {
+              "type": "array",
+              "items": {"type": "string"},
+              "default": ["REQUIREMENTS", "PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "QUALITY_CHECK", "REFACTOR", "PERFORMANCE", "SECURITY", "DEPLOY"]
+            },
+            "description": {"type": "string"}
+          }
+        }
+      }
+    },
+    "complexityRules": {
+      "type": "object",
+      "description": "Rules for determining task complexity",
+      "properties": {
+        "trivial": {
+          "type": "object",
+          "properties": {
+            "maxLinesChanged": {"type": "integer", "default": 5},
+            "maxNewFiles": {"type": "integer", "default": 0},
+            "description": {"type": "string"}
+          }
+        },
+        "simple": {
+          "type": "object",
+          "properties": {
+            "maxLinesChanged": {"type": "integer", "default": 50},
+            "maxNewFiles": {"type": "integer", "default": 2},
+            "description": {"type": "string"}
+          }
+        },
+        "moderate": {
+          "type": "object",
+          "properties": {
+            "maxLinesChanged": {"type": "integer", "default": 200},
+            "maxNewFiles": {"type": "integer", "default": 5},
+            "description": {"type": "string"}
+          }
+        },
+        "complex": {
+          "type": "object",
+          "properties": {
+            "minLinesChanged": {"type": "integer", "default": 200},
+            "minNewFiles": {"type": "integer", "default": 5},
+            "description": {"type": "string"}
+          }
+        }
+      }
+    }
+  }
+}

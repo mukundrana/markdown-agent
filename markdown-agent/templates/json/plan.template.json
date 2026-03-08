@@ -1,0 +1,174 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-plan.json",
+  "title": "Task Plan",
+  "description": "Execution plan synthesized from PLANNER, CRITIC, and SYNTHESIZER",
+  "type": "object",
+  "required": ["taskId", "createdAt", "synthesizedAt", "waves"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^task-[0-9]+$"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "synthesizedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "perspectives": {
+      "type": "object",
+      "properties": {
+        "optimistic": {
+          "type": "object",
+          "properties": {
+            "agent": {"type": "string"},
+            "taskCount": {"type": "integer"},
+            "estimatedTime": {"type": "string"},
+            "parallelizationPotential": {"type": "string"},
+            "file": {"type": "string"}
+          }
+        },
+        "cautious": {
+          "type": "object",
+          "properties": {
+            "agent": {"type": "string"},
+            "additionalTasks": {"type": "integer"},
+            "risksIdentified": {"type": "array", "items": {"type": "string"}},
+            "defensiveMeasures": {"type": "array", "items": {"type": "string"}},
+            "file": {"type": "string"}
+          }
+        },
+        "synthesized": {
+          "type": "object",
+          "properties": {
+            "agent": {"type": "string"},
+            "finalTaskCount": {"type": "integer"},
+            "balancedApproach": {"type": "string"},
+            "riskMitigation": {"type": "string"}
+          }
+        }
+      }
+    },
+    "waves": {
+      "type": "array",
+      "description": "Execution waves in dependency order",
+      "items": {
+        "type": "object",
+        "required": ["number", "name", "tasks"],
+        "properties": {
+          "number": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "name": {
+            "type": "string",
+            "description": "Wave name (e.g., 'Setup', 'Core', 'Advanced')"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parallel": {
+            "type": "boolean",
+            "description": "Can tasks in this wave run in parallel?"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "description", "type"],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^t[0-9]+$"
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "type": {
+                  "type": "string",
+                  "enum": ["create", "modify", "delete", "refactor", "test", "document"]
+                },
+                "priority": {
+                  "type": "string",
+                  "enum": ["critical", "high", "medium", "low"],
+                  "default": "medium"
+                },
+                "estimatedTime": {
+                  "type": "string"
+                },
+                "files": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "dependencies": {
+                  "type": "array",
+                  "items": {"type": "string"},
+                  "description": "Task IDs this depends on"
+                },
+                "acceptanceCriteria": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "risks": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["pending", "in_progress", "completed", "failed", "skipped"],
+                  "default": "pending"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "riskAssessment": {
+      "type": "object",
+      "properties": {
+        "high": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "medium": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "low": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "mitigations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "risk": {"type": "string"},
+              "mitigation": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "estimatedDuration": {
+      "type": "string",
+      "description": "Overall estimated time (e.g., '2-3 hours')"
+    },
+    "skipRecommendations": {
+      "type": "array",
+      "description": "Stages that can be skipped based on task analysis",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage": {"type": "string"},
+          "reason": {"type": "string"}
+        }
+      }
+    }
+  }
+}

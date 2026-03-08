@@ -1,0 +1,13 @@
+{
+  "updatedAt": null,
+  "tasks": [],
+  "statistics": {
+    "total": 0,
+    "pending": 0,
+    "inProgress": 0,
+    "completed": 0,
+    "failed": 0,
+    "cancelled": 0
+  },
+  "nextTaskId": null
+}

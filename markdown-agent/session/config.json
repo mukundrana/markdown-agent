@@ -1,0 +1,39 @@
+{
+  "sessionStarted": null,
+  "project": {
+    "name": "",
+    "type": "web-application",
+    "language": "javascript",
+    "framework": "vanilla",
+    "rootPath": "./src"
+  },
+  "settings": {
+    "maxParallelWaves": 3,
+    "retryAttempts": 3,
+    "defaultWorkflow": "standard",
+    "qualityThreshold": 70,
+    "securityCheckRequired": true,
+    "autoDeploy": false,
+    "stopOnFailure": true
+  },
+  "workflows": {
+    "quick": {
+      "stages": ["IMPLEMENTATION", "VERIFICATION"],
+      "description": "Quick fix workflow for trivial changes"
+    },
+    "standard": {
+      "stages": ["PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "SECURITY", "DEPLOY"],
+      "description": "Standard development workflow"
+    },
+    "full": {
+      "stages": ["REQUIREMENTS", "PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "QUALITY_CHECK", "REFACTOR", "PERFORMANCE", "SECURITY", "DEPLOY"],
+      "description": "Full workflow with all stages"
+    }
+  },
+  "complexityRules": {
+    "trivial": { "maxLinesChanged": 5, "maxNewFiles": 0 },
+    "simple": { "maxLinesChanged": 50, "maxNewFiles": 2 },
+    "moderate": { "maxLinesChanged": 200, "maxNewFiles": 5 },
+    "complex": { "minLinesChanged": 200, "minNewFiles": 5 }
+  }
+}

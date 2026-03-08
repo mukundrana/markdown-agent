@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-state.json",
+  "title": "Task State",
+  "description": "Current state of a single task",
+  "type": "object",
+  "required": ["taskId", "name", "status", "complexity", "workflow", "currentStage", "createdAt", "updatedAt"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^task-[0-9]+$",
+      "description": "Unique task identifier"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Task name/description"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["pending", "in_progress", "paused", "completed", "failed", "cancelled"],
+      "default": "pending"
+    },
+    "complexity": {
+      "type": "string",
+      "enum": ["trivial", "simple", "moderate", "complex"],
+      "description": "Task complexity level"
+    },
+    "workflow": {
+      "type": "string",
+      "enum": ["quick", "standard", "full"],
+      "description": "Workflow type based on complexity"
+    },
+    "currentStage": {
+      "type": "object",
+      "required": ["name", "number", "progress"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": ["REQUIREMENTS", "PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "QUALITY_CHECK", "REFACTOR", "PERFORMANCE", "SECURITY", "DEPLOY", "COMPLETE"]
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "progress": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "currentWave": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Current implementation wave (null if not in IMPLEMENTATION)"
+    },
+    "totalWaves": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total waves in plan"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "startedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "completedAt": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "agents": {
+      "type": "object",
+      "properties": {
+        "completed": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "current": {
+          "type": ["string", "null"]
+        },
+        "pending": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "properties": {
+        "filesCreated": {"type": "integer", "default": 0},
+        "filesModified": {"type": "integer", "default": 1},
+        "testsWritten": {"type": "integer", "default": 1},
+        "testsPassing": {"type": "integer", "default": 0},
+        "testsFailing": {"type": "integer", "default": 0}
+      }
+    },
+    "error": {
+      "type": ["object", "null"],
+      "properties": {
+        "message": {"type": "string"},
+        "stage": {"type": "string"},
+        "timestamp": {"type": "string"},
+        "retryCount": {"type": "integer"}
+      }
+    }
+  }
+}

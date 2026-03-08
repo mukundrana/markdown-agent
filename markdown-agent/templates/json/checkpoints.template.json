@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "task-checkpoints.json",
+  "title": "Task Checkpoints",
+  "description": "Resume points for a single task",
+  "type": "object",
+  "required": ["taskId", "checkpoints"],
+  "properties": {
+    "taskId": {
+      "type": "string",
+      "pattern": "^task-[0-9]+$"
+    },
+    "checkpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "timestamp", "stage", "stageNumber"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^cp-[0-9]+$"
+          },
+          "name": {
+            "type": "string",
+            "description": "Checkpoint name (e.g., IMPLEMENTATION-WAVE-1-COMPLETE)"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "stage": {
+            "type": "string",
+            "enum": ["REQUIREMENTS", "PLANNING", "IMPLEMENTATION", "VERIFICATION", "REVIEW", "QUALITY_CHECK", "REFACTOR", "PERFORMANCE", "SECURITY", "DEPLOY", "COMPLETE"]
+          },
+          "stageNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "waveNumber": {
+            "type": ["integer", "null"],
+            "description": "Wave number if this checkpoint is during IMPLEMENTATION"
+          },
+          "filesModified": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "filesCreated": {
+            "type": "array",
+            "items": {"type": "string"}
+          },
+          "stateSnapshot": {
+            "type": "object",
+            "description": "Snapshot of task state at checkpoint time",
+            "properties": {
+              "agentsCompleted": {"type": "array", "items": {"type": "string"}},
+              "progress": {"type": "integer"},
+              "testsPassing": {"type": "integer"},
+              "testsFailing": {"type": "integer"}
+            }
+          },
+          "resumeInstruction": {
+            "type": "string",
+            "description": "What to do when resuming from this checkpoint"
+          }
+        }
+      }
+    }
+  }
+}
