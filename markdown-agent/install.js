@@ -50,6 +50,8 @@ const filesToCopy = [
   'AMAZONQ.md',     // Amazon Q
   'COHERE.md',      // Cohere
   'OPENCODE.md',    // OpenCode
+  'TABNINE.md',     // Tabnine
+  'CODEIUM.md',     // Codeium
   'START.md',       // Quick start guide
   'INSTRUCTIONS.md' // General instructions
 ];
@@ -89,7 +91,8 @@ function showHelp() {
   log('Supported AI Tools:');
   log('  Claude Code, Gemini, Codex/GPT, GitHub Copilot,');
   log('  Qwen, DeepSeek, Mistral, Aider, Qoder, Replit,');
-  log('  Amazon Q, Cohere, OpenCode, Cursor, Windsurf\n');
+  log('  Amazon Q, Cohere, OpenCode, Tabnine, Codeium,');
+  log('  Cursor, Windsurf\n');
 
   log('What it does:');
   log('  1. Copies AI instruction files to project root');
