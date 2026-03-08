@@ -34,13 +34,47 @@ A **complete portable agent system** in markdown files - 20 agents, 10 stages, w
 
 ---
 
-## Quick Start (3 Steps)
+## Quick Start (2 Steps)
 
-1. **Copy** `markdown-agent/` folder to your project
-2. **Say** "go baby go" in any AI CLI (Claude Code, Cursor, Copilot, etc.)
-3. **Describe your task** when prompted
+### Step 1: Copy & Install
+
+```bash
+# 1. Copy the entire markdown-agent folder to your project
+cp -r markdown-agent /path/to/your/project/
+
+# 2. Run the install script from inside markdown-agent
+cd /path/to/your/project/markdown-agent
+node install.js
+```
+
+**Windows:**
+```cmd
+copy markdown-agent C:\your\project\
+cd C:\your\project\markdown-agent
+install.bat
+```
+
+**What the install script does:**
+- Copies `CLAUDE.md`, `GEMINI.md`, `CODEX.md`, `START.md` to your project root
+- Creates the `session/` folder with initial state files
+- Updates `.gitignore` to exclude session files
+
+### Step 2: Activate
+
+Say **"go baby go"** in any AI CLI (Claude Code, Cursor, Copilot, Gemini, etc.)
 
 That's it! The agent system will autonomously execute all 10 stages.
+
+---
+
+### Install Script Options
+
+```bash
+node install.js              # Standard install
+node install.js --force      # Overwrite existing files
+node install.js --status     # Check installation status
+node install.js --help       # Show help
+```
 
 ## How It Works
 
@@ -58,13 +92,18 @@ The entire agent system is contained in markdown files. When triggered:
 
 ```
 markdown-agent/
+├── install.js           # Setup script (run this first!)
+├── install.bat          # Windows setup script
+├── install.sh           # Mac/Linux setup script
+├── CLAUDE.md            # Claude Code instructions (copied to root)
+├── GEMINI.md            # Gemini instructions (copied to root)
+├── CODEX.md             # Codex instructions (copied to root)
+├── START.md             # Quick start (copied to root)
+│
 ├── root.md              # Entry point - activates system
 ├── config.md            # 20 agent configurations
 ├── dashboard.html       # Visual dashboard (no server needed)
-├── docs/reference/workflow.md          # 10-stage workflow
-├── docs/guides/help.md              # Comprehensive help
 ├── readme.md            # This file
-├── docs/guides/usage-example.md     # Complete walkthrough
 │
 ├── agents/              # 20 agent definitions
 │   ├── planner.md       # Optimistic planner
@@ -100,8 +139,27 @@ markdown-agent/
 │           ├── plan.json        # Execution plan
 │           └── checkpoints.json # Resumption points
 │
-├── dashboard.html       # Interactive visualization tool (no server needed)
+├── docs/                # Documentation
+│   ├── guides/          # Usage guides
+│   └── reference/       # Reference docs
+│
 └── ownership.md         # File ownership guide
+```
+
+### After Running Install Script
+
+```
+your-project/
+├── CLAUDE.md            ← Claude Code reads this automatically
+├── GEMINI.md            ← Gemini reads this automatically
+├── CODEX.md             ← Codex reads this automatically
+├── START.md             ← Quick start reference
+├── .gitignore           ← Updated to ignore session/
+├── markdown-agent/      ← The agent system
+│   ├── agents/
+│   ├── templates/
+│   └── session/
+└── src/                 ← Your actual code
 ```
 
 ## Templates vs Runtime Files
