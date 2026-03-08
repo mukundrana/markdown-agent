@@ -1,6 +1,6 @@
 # 🤖 Autonomous Agent System
 
-Read `markdown-agent/CLAUDE.md` for full instructions.
+Read `markdown-agent/root.md` for full instructions.
 
 **Quick Start:**
 1. Say **"go baby go"** to activate
