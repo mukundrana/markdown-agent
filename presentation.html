@@ -1,0 +1,3243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Autonomous Agent System - Hackathon 2026</title>
+    <style>
+        /* ===== CSS Variables ===== */
+        :root {
+            --bg-primary: #0d1117;
+            --bg-secondary: #161b22;
+            --bg-tertiary: #21262d;
+            --accent: #58a6ff;
+            --accent-glow: rgba(88, 166, 255, 0.3);
+            --success: #3fb950;
+            --warning: #d29922;
+            --danger: #f85149;
+            --purple: #a371f7;
+            --orange: #f0883e;
+            --cyan: #39c5cf;
+            --pink: #db61a2;
+            --text-primary: #c9d1d9;
+            --text-secondary: #8b949e;
+            --text-muted: #6e7681;
+            --border: #30363d;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        /* ===== Base Styles ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            line-height: 1.6;
+        }
+
+        /* ===== Presentation Container ===== */
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ===== Slides Container ===== */
+        .slides-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* ===== Slide Scrollbar ===== */
+        .slide::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .slide::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        .slide::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        .slide::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* ===== Slide Backgrounds ===== */
+        .slide-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .slide-bg::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 30%, var(--accent-glow) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 70%, rgba(163, 113, 247, 0.1) 0%, transparent 50%);
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(2%, 2%) rotate(1deg); }
+            66% { transform: translate(-1%, 1%) rotate(-1deg); }
+        }
+
+        /* ===== Grid Pattern ===== */
+        .grid-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.1;
+        }
+
+        /* ===== Slide Content ===== */
+        .slide-content {
+            max-width: 1200px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .slide-content.left { text-align: left; }
+        .slide-content.full { max-width: 1400px; }
+
+        /* ===== Typography ===== */
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: slideInUp 0.8s ease-out;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            animation: slideInUp 0.8s ease-out 0.1s both;
+        }
+
+        h3 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--accent);
+            animation: slideInUp 0.8s ease-out 0.2s both;
+        }
+
+        h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: var(--text-primary);
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            line-height: 1.8;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== Tagline ===== */
+        .tagline {
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            animation: slideInUp 0.8s ease-out 0.2s both;
+        }
+
+        /* ===== Badge ===== */
+        .badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--accent);
+            margin: 0.3rem;
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+
+        /* ===== Cards ===== */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+            width: 100%;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+        .card:nth-child(4) { animation-delay: 0.4s; }
+        .card:nth-child(5) { animation-delay: 0.5s; }
+        .card:nth-child(6) { animation-delay: 0.6s; }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+            box-shadow: 0 8px 24px rgba(88, 166, 255, 0.15);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .card-desc {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ===== Lists ===== */
+        .feature-list {
+            list-style: none;
+            text-align: left;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .feature-list li {
+            display: flex;
+            align-items: center;
+            padding: 0.8rem 0;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+            animation: slideInLeft 0.5s ease-out both;
+        }
+
+        .feature-list li:nth-child(1) { animation-delay: 0.1s; }
+        .feature-list li:nth-child(2) { animation-delay: 0.2s; }
+        .feature-list li:nth-child(3) { animation-delay: 0.3s; }
+        .feature-list li:nth-child(4) { animation-delay: 0.4s; }
+        .feature-list li:nth-child(5) { animation-delay: 0.5s; }
+        .feature-list li:nth-child(6) { animation-delay: 0.6s; }
+
+        .feature-list li::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            margin-right: 1rem;
+            flex-shrink: 0;
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* ===== Problem/Solution Split ===== */
+        .split-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        .split-panel {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: left;
+        }
+
+        .split-panel.problem {
+            border-color: var(--danger);
+        }
+
+        .split-panel.solution {
+            border-color: var(--success);
+        }
+
+        .split-panel h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .split-panel.problem h3 { color: var(--danger); }
+        .split-panel.solution h3 { color: var(--success); }
+
+        /* ===== Workflow Diagram ===== */
+        .workflow-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 2rem -1rem;
+            padding: 0 1rem;
+        }
+
+        .workflow-step {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem 1rem 0.9rem 1rem;
+            text-align: center;
+            min-width: 100px;
+            max-width: calc(20% - 0.64rem);
+            flex: 1 1 calc(20% - 0.64rem);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: visible;
+            z-index: 1;
+        }
+
+        .workflow-step::before {
+            content: attr(data-step);
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: var(--bg-primary);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+            z-index: 2;
+        }
+
+        .workflow-step::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.5s ease, height 0.5s ease;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .workflow-step:hover {
+            border-color: var(--accent);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        .workflow-step:hover::after {
+            width: 200%;
+            height: 200%;
+        }
+
+        .workflow-step.active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .workflow-step.active .step-name,
+        .workflow-step.active .step-icon {
+            color: var(--bg-primary);
+        }
+
+        .workflow-step.animating {
+            animation: pulseStage 0.6s ease;
+        }
+
+        @keyframes pulseStage {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); box-shadow: 0 0 20px var(--accent); }
+            100% { transform: scale(1); }
+        }
+
+        .step-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== Agent Grid ===== */
+        .agent-category {
+            margin-bottom: 2rem;
+        }
+
+        .agent-category-title {
+            font-size: 1.3rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .agent-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: left;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .agent-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent);
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .agent-card:hover::before {
+            transform: scaleY(1);
+        }
+
+        .agent-card:hover {
+            transform: translateX(5px);
+            border-color: var(--accent);
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.3rem;
+        }
+
+        .agent-role {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* ===== Comparison Table ===== */
+        .comparison-table {
+            width: 100%;
+            max-width: 900px;
+            margin: 2rem auto;
+            border-collapse: collapse;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .comparison-table th,
+        .comparison-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background: var(--bg-tertiary);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .comparison-table th:first-child {
+            color: var(--accent);
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table .check {
+            color: var(--success);
+            font-size: 1.3rem;
+        }
+
+        .comparison-table .cross {
+            color: var(--danger);
+            font-size: 1.3rem;
+        }
+
+        .comparison-table .highlight {
+            background: rgba(88, 166, 255, 0.1);
+        }
+
+        /* ===== Stats Counter ===== */
+        .stats-container {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            flex-wrap: wrap;
+            margin: 3rem 0;
+        }
+
+        .stat-item {
+            text-align: center;
+            animation: scaleIn 0.6s ease-out both;
+        }
+
+        .stat-item:nth-child(1) { animation-delay: 0.1s; }
+        .stat-item:nth-child(2) { animation-delay: 0.2s; }
+        .stat-item:nth-child(3) { animation-delay: 0.3s; }
+        .stat-item:nth-child(4) { animation-delay: 0.4s; }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* ===== Code Block ===== */
+        .code-block {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: left;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        .code-block .comment {
+            color: var(--text-muted);
+        }
+
+        .code-block .command {
+            color: var(--success);
+        }
+
+        .code-block .string {
+            color: var(--accent);
+        }
+
+        .code-block .keyword {
+            color: var(--purple);
+        }
+
+        /* ===== AI Platforms Grid ===== */
+        .platforms-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .platform-badge {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 25px;
+            padding: 0.6rem 1.2rem;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .platform-badge:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--accent-glow);
+        }
+
+        .platform-badge .icon {
+            font-size: 1.2rem;
+        }
+
+        /* ===== Logo ===== */
+        .logo-container {
+            width: 160px;
+            height: 160px;
+            margin: 0 auto 2rem;
+            position: relative;
+        }
+
+        .logo-svg {
+            width: 100%;
+            height: 100%;
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* ===== Navigation Controls ===== */
+        .nav-controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            z-index: 200;
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 0.4rem 0.7rem;
+        }
+
+        .nav-btn {
+            background: rgba(33, 38, 45, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-primary);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--bg-primary);
+            box-shadow: 0 0 15px rgba(88, 166, 255, 0.4);
+        }
+
+        .slide-counter {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            min-width: 45px;
+            text-align: center;
+        }
+
+        /* ===== Progress Bar ===== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            transition: width 0.3s ease;
+            z-index: 180;
+        }
+
+        /* ===== Slide Indicators ===== */
+        .slide-indicators {
+            position: fixed;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            z-index: 180;
+        }
+
+        .indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator:hover {
+            background: var(--text-secondary);
+        }
+
+        .indicator.active {
+            background: var(--accent);
+            transform: scale(1.3);
+        }
+
+        /* ===== Presenter Notes Toggle ===== */
+        .presenter-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 5.5rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            z-index: 180;
+            transition: all 0.3s ease;
+        }
+
+        .presenter-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .presenter-notes {
+            position: fixed;
+            bottom: 6rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            max-width: 500px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 250;
+        }
+
+        .presenter-notes.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ===== Fullscreen Toggle ===== */
+        .fullscreen-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            z-index: 180;
+            transition: all 0.3s ease;
+        }
+
+        .fullscreen-toggle:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        /* ===== Neural Network Background Canvas ===== */
+        #neuralCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* ===== Keyboard Shortcuts Help ===== */
+        .shortcuts-toggle {
+            position: fixed;
+            bottom: 2rem;
+            right: 1rem;
+            background: rgba(22, 27, 34, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            z-index: 200;
+            transition: all 0.3s ease;
+        }
+
+        .shortcuts-toggle:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .shortcuts-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            min-width: 400px;
+            max-width: 90vw;
+            z-index: 300;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .shortcuts-modal.visible {
+            opacity: 1;
+            pointer-events: all;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .shortcuts-modal h3 {
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .shortcuts-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.8rem 1.5rem;
+            align-items: center;
+        }
+
+        .shortcut-key {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.3rem 0.6rem;
+            font-family: 'SF Mono', 'Monaco', monospace;
+            font-size: 0.85rem;
+            text-align: center;
+            min-width: 80px;
+        }
+
+        .shortcut-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .shortcuts-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 299;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .shortcuts-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        /* ===== Agent Card Flip Effect ===== */
+        .agent-card {
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .agent-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .agent-card:hover .agent-card-inner,
+        .agent-card.flipped .agent-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .agent-card-front,
+        .agent-card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .agent-card-front {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .agent-card-back {
+            background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transform: rotateY(180deg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ===== Enhanced Slide Transitions ===== */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 3rem 4rem 7rem 3rem;
+            opacity: 0;
+            transform: translateX(100%) scale(0.95);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+            pointer-events: all;
+        }
+
+        .slide.prev {
+            transform: translateX(-100%) scale(0.95);
+        }
+
+        /* ===== Workflow Progress Line ===== */
+        .workflow-progress-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            transition: width 0.5s ease;
+            border-radius: 0 0 8px 8px;
+        }
+
+        /* ===== Stat Value Animation Enhancement ===== */
+        .stat-value {
+            display: inline-block;
+            position: relative;
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), var(--purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-value::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            transition: width 0.5s ease;
+        }
+
+        .stat-value.animated::after {
+            width: 100%;
+        }
+
+        /* ===== Highlight Box ===== */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(163, 113, 247, 0.1));
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .highlight-box h4 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        /* ===== FAQ Accordion ===== */
+        .faq-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            text-align: left;
+        }
+
+        .faq-category {
+            margin-bottom: 2rem;
+        }
+
+        .faq-category-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .faq-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            margin-bottom: 0.8rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .faq-item:hover {
+            border-color: var(--accent);
+        }
+
+        .faq-question {
+            padding: 1rem 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            user-select: none;
+        }
+
+        .faq-question-text {
+            font-weight: 500;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .faq-toggle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .faq-toggle::after {
+            content: '+';
+            font-size: 1.2rem;
+            color: var(--accent);
+        }
+
+        .faq-item.active .faq-toggle {
+            background: var(--accent);
+        }
+
+        .faq-item.active .faq-toggle::after {
+            content: '−';
+            color: var(--bg-primary);
+        }
+
+        .faq-answer {
+            display: none;
+            padding: 0 1.2rem;
+            background: var(--bg-tertiary);
+            overflow: hidden;
+        }
+
+        .faq-item.active .faq-answer {
+            display: block;
+            padding: 1rem 1.2rem;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 500px;
+            }
+        }
+
+        .faq-answer-text {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .faq-answer-text strong {
+            color: var(--text-primary);
+        }
+
+        /* ===== Use Case Icons ===== */
+        .use-case-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .use-case-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .use-case-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--purple);
+            box-shadow: 0 8px 24px rgba(163, 113, 247, 0.2);
+        }
+
+        .use-case-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* ===== Roadmap ===== */
+        .roadmap-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .roadmap-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .roadmap-item:hover {
+            border-color: var(--accent);
+            transform: translateX(10px);
+        }
+
+        .roadmap-icon {
+            font-size: 1.5rem;
+            width: 50px;
+            text-align: center;
+        }
+
+        .roadmap-text {
+            flex: 1;
+            text-align: left;
+        }
+
+        .roadmap-text h4 {
+            margin-bottom: 0.2rem;
+        }
+
+        .roadmap-text p {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* ===== Two Column Layout ===== */
+        .two-col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            width: 100%;
+        }
+
+        .two-col > div {
+            text-align: left;
+        }
+
+        /* ===== Animated Arrow ===== */
+        .arrow-down {
+            font-size: 2rem;
+            color: var(--accent);
+            margin: 1rem 0;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 1024px) {
+            h1 { font-size: 2.5rem; }
+            h2 { font-size: 2rem; }
+            .slide { padding: 2rem 2rem 6rem 2rem; }
+            .two-col { grid-template-columns: 1fr; gap: 2rem; }
+            .split-container { grid-template-columns: 1fr; }
+            .cards-container { grid-template-columns: 1fr; }
+            .stats-container { gap: 2rem; }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            h2 { font-size: 1.5rem; }
+            .workflow-step {
+                min-width: 80px;
+                padding: 0.7rem 0.8rem;
+                max-width: calc(33.33% - 0.54rem);
+                flex: 1 1 calc(33.33% - 0.54rem);
+            }
+            .step-icon { font-size: 1.2rem; }
+            .step-name { font-size: 0.7rem; }
+            .slide-indicators { display: none; }
+            .slide { padding: 1.5rem 1.5rem 6rem 1.5rem; }
+        }
+
+        /* ===== Utility Classes ===== */
+        .text-accent { color: var(--accent); }
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-purple { color: var(--purple); }
+        .mt-2 { margin-top: 2rem; }
+        .mb-2 { margin-bottom: 2rem; }
+
+        /* ===== Demo Terminal ===== */
+        .demo-terminal {
+            background: #0d1117;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 2rem auto;
+            max-width: 800px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .terminal-header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 0.8rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .terminal-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .terminal-btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .terminal-btn.close { background: #ff5f56; }
+        .terminal-btn.minimize { background: #ffbd2e; }
+        .terminal-btn.maximize { background: #27c93f; }
+
+        .terminal-title {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-family: 'SF Mono', 'Monaco', monospace;
+        }
+
+        .terminal-body {
+            padding: 1.5rem;
+            font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+            font-size: 0.9rem;
+            min-height: 350px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+            opacity: 0;
+            animation: fadeInTerminal 0.3s ease forwards;
+        }
+
+        @keyframes fadeInTerminal {
+            to { opacity: 1; }
+        }
+
+        .terminal-prompt {
+            color: var(--success);
+            margin-right: 0.5rem;
+        }
+
+        .terminal-input {
+            color: var(--text-primary);
+        }
+
+        .terminal-input.typing {
+            overflow: hidden;
+            white-space: nowrap;
+            border-right: 2px solid var(--accent);
+            animation: typing 2s steps(30) forwards, blink 0.5s step-end infinite alternate;
+        }
+
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        @keyframes blink {
+            50% { border-color: transparent; }
+        }
+
+        .cursor {
+            color: var(--accent);
+            animation: cursorBlink 1s step-end infinite;
+        }
+
+        @keyframes cursorBlink {
+            50% { opacity: 0; }
+        }
+
+        .terminal-output {
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+        }
+
+        .terminal-success {
+            color: var(--success);
+        }
+
+        .terminal-info {
+            color: var(--accent);
+        }
+
+        .terminal-warning {
+            color: var(--warning);
+        }
+
+        .terminal-agent {
+            color: var(--purple);
+            font-weight: 600;
+        }
+
+        .terminal-stage {
+            color: var(--cyan);
+        }
+
+        .terminal-progress {
+            display: inline-block;
+            width: 100px;
+            height: 2px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            overflow: hidden;
+            vertical-align: middle;
+            margin-left: 0.5rem;
+        }
+
+        .terminal-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--purple));
+            animation: progressFill 2s ease forwards;
+        }
+
+        @keyframes progressFill {
+            from { width: 0%; }
+            to { width: 100%; }
+        }
+
+        .terminal-spinner {
+            display: inline-block;
+            width: 16px;
+            text-align: left;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .terminal-muted {
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Slide Indicators -->
+    <div class="slide-indicators" id="slideIndicators"></div>
+
+    <!-- Presenter Notes -->
+    <div class="presenter-notes" id="presenterNotes"></div>
+
+    <!-- Fullscreen Toggle -->
+    <button class="fullscreen-toggle" id="fullscreenToggle" title="Fullscreen (F)">⛶</button>
+
+    <!-- Presenter Toggle -->
+    <button class="presenter-toggle" id="presenterToggle" title="Presenter Notes (P)">📝</button>
+
+    <!-- Keyboard Shortcuts Toggle -->
+    <button class="shortcuts-toggle" id="shortcutsToggle" title="Keyboard Shortcuts (?)">?</button>
+
+    <!-- Shortcuts Modal -->
+    <div class="shortcuts-overlay" id="shortcutsOverlay"></div>
+    <div class="shortcuts-modal" id="shortcutsModal">
+        <h3>⌨️ Keyboard Shortcuts</h3>
+        <div class="shortcuts-grid">
+            <div class="shortcut-key">→ / Space</div>
+            <div class="shortcut-desc">Next slide</div>
+
+            <div class="shortcut-key">←</div>
+            <div class="shortcut-desc">Previous slide</div>
+
+            <div class="shortcut-key">↑ / ↓</div>
+            <div class="shortcut-desc">Scroll content</div>
+
+            <div class="shortcut-key">Home / End</div>
+            <div class="shortcut-desc">First / Last slide</div>
+
+            <div class="shortcut-key">F</div>
+            <div class="shortcut-desc">Toggle fullscreen</div>
+
+            <div class="shortcut-key">P</div>
+            <div class="shortcut-desc">Toggle presenter notes</div>
+
+            <div class="shortcut-key">R</div>
+            <div class="shortcut-desc">Replay demo (on demo slide)</div>
+
+            <div class="shortcut-key">?</div>
+            <div class="shortcut-desc">Show this help</div>
+
+            <div class="shortcut-key">Esc</div>
+            <div class="shortcut-desc">Close modals / Exit fullscreen</div>
+        </div>
+    </div>
+
+    <!-- Neural Network Canvas -->
+    <canvas id="neuralCanvas"></canvas>
+
+    <!-- Shared Fixed Background -->
+    <div class="slide-bg">
+        <div class="grid-pattern"></div>
+    </div>
+
+    <!-- Presentation Container -->
+    <div class="presentation">
+        <div class="slides-container" id="slidesContainer">
+
+            <!-- SLIDE 1: Title -->
+            <div class="slide active" data-notes="Welcome everyone! Today we're excited to present the Markdown Autonomous Agent System - a revolutionary approach to AI agent orchestration.">
+                <div class="slide-content">
+                    <div class="logo-container">
+                        <svg class="logo-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Outer ring with rotation -->
+                            <circle cx="60" cy="60" r="55" stroke="url(#grad1)" stroke-width="2" fill="none" opacity="0.2" style="transform-origin: center;">
+                                <animateTransform attributeName="transform" type="rotate" from="0 60 60" to="360 60 60" dur="20s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Middle ring -->
+                            <circle cx="60" cy="60" r="42" stroke="url(#grad1)" stroke-width="2" fill="none" opacity="0.4"/>
+                            <!-- Brain/AI Icon -->
+                            <g transform="translate(60,60)">
+                                <!-- Brain shape -->
+                                <path d="M-20 -15 Q-25 -5 -20 5 Q-15 15 -5 15 Q5 15 10 5 Q15 -5 10 -15 Q5 -25 -5 -25 Q-15 -25 -20 -15"
+                                      fill="url(#grad1)" opacity="0.3"/>
+                                <path d="M20 -15 Q25 -5 20 5 Q15 15 5 15 Q-5 15 -10 5 Q-15 -5 -10 -15 Q-5 -25 5 -25 Q15 -25 20 -15"
+                                      fill="url(#grad1)" opacity="0.3"/>
+                                <!-- Neural connections -->
+                                <line x1="-15" y1="-5" x2="15" y2="-5" stroke="#58a6ff" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="-15" y1="5" x2="15" y2="5" stroke="#58a6ff" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="0" y1="-15" x2="0" y2="15" stroke="#58a6ff" stroke-width="1.5" opacity="0.5"/>
+                                <!-- Nodes -->
+                                <circle cx="-15" cy="-5" r="3" fill="#58a6ff">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="15" cy="-5" r="3" fill="#a371f7">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+                                </circle>
+                                <circle cx="-15" cy="5" r="3" fill="#a371f7">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="1s"/>
+                                </circle>
+                                <circle cx="15" cy="5" r="3" fill="#58a6ff">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="1.5s"/>
+                                </circle>
+                                <circle cx="0" cy="-10" r="3" fill="#58a6ff">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="0.3s"/>
+                                </circle>
+                                <circle cx="0" cy="10" r="3" fill="#a371f7">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="0.8s"/>
+                                </circle>
+                            </g>
+                            <!-- Checkmark overlay -->
+                            <path d="M35 60 L50 75 L75 45" stroke="#58a6ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" style="filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.5));">
+                                <animate attributeName="stroke-dasharray" from="0,100" to="100,0" dur="1.5s" fill="freeze" begin="0.5s"/>
+                            </path>
+                            <defs>
+                                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#58a6ff"/>
+                                    <stop offset="50%" style="stop-color:#7974ff"/>
+                                    <stop offset="100%" style="stop-color:#a371f7"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div class="badge">Hackathon 2026</div>
+                    <p class="tagline" style="color: var(--accent); font-weight: 600;">🎭 Team M-AI-RACLES</p>
+                    <h1>Markdown Autonomous Agent System</h1>
+                    <p class="tagline">Universal AI Agent Orchestration in Pure Markdown</p>
+                    <div class="arrow-down">↓</div>
+                    <p style="color: var(--text-muted);">Press <kbd style="background: var(--bg-tertiary); padding: 0.2rem 0.5rem; border-radius: 4px;">→</kbd> or click to continue</p>
+                </div>
+            </div>
+
+            <!-- SLIDE 2: Problem Statement -->
+            <div class="slide" data-notes="Let's start by understanding the problem. The AI landscape is fragmented - each tool requires different setup, different workflows, and there's no unified standard.">
+                <div class="slide-content">
+                    <h2>The Problem</h2>
+                    <p style="max-width: 700px; margin: 0 auto 2rem;">The AI development landscape is fragmented and chaotic</p>
+                    <div class="split-container">
+                        <div class="split-panel problem">
+                            <h3>❌ Current Challenges</h3>
+                            <ul class="feature-list" style="margin: 0;">
+                                <li>No unified workflow across AI platforms</li>
+                                <li>Manual prompt engineering for each tool</li>
+                                <li>No quality control standards</li>
+                                <li>Difficult to track progress</li>
+                                <li>No checkpoint/resume capability</li>
+                                <li>AI vendor lock-in</li>
+                            </ul>
+                        </div>
+                        <div class="split-panel solution">
+                            <h3>✅ The Impact</h3>
+                            <div style="text-align: center; margin-top: 1rem;">
+                                <p class="text-danger" style="font-size: 1.5rem; font-weight: 700;">60-80%</p>
+                                <p>time wasted on repetitive tasks</p>
+                                <hr style="border-color: var(--border); margin: 1rem 0;">
+                                <p class="text-danger" style="font-size: 1.5rem; font-weight: 700;">10+</p>
+                                <p>different AI workflows to learn</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 3: Solution -->
+            <div class="slide" data-notes="Our solution is elegant in its simplicity - a universal, markdown-based agent orchestration system that works with ANY AI platform.">
+                <div class="slide-content">
+                    <div class="badge">Our Solution</div>
+                    <h2>One System, All AI Tools</h2>
+                    <p class="tagline">Universal markdown-based agent orchestration</p>
+                    <div class="highlight-box">
+                        <h3 style="margin-bottom: 1rem;">🎯 What is it?</h3>
+                        <p>A complete autonomous agent system built entirely in markdown files that works with 17+ AI platforms</p>
+                    </div>
+                    <div class="cards-container">
+                        <div class="card">
+                            <div class="card-icon">📝</div>
+                            <div class="card-title">Pure Markdown</div>
+                            <div class="card-desc">No compilation, no dependencies, works everywhere</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🤖</div>
+                            <div class="card-title">26 Agents</div>
+                            <div class="card-desc">Specialized agents for every development task</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔄</div>
+                            <div class="card-title">11 Stages</div>
+                            <div class="card-desc">Comprehensive workflow from requirements to deploy</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">♾️</div>
+                            <div class="card-title">Universal</div>
+                            <div class="card-desc">Works with Claude, Gemini, Copilot, and 14 more</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 2rem; padding: 1rem 2rem; background: var(--bg-secondary); border-radius: 12px; border-left: 4px solid var(--purple);">
+                        <h4 style="color: var(--purple); margin-bottom: 0.5rem;">🚀 The Innovation</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem;">
+                            <strong>Autonomous agents</strong> that don't require runtime, <strong>work with any AI</strong>, and <strong>you can customize</strong>. No vendor lock-in - use Claude today, Gemini tomorrow. This is the future.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 4: How It Works -->
+            <div class="slide" data-notes="The beauty of our system is its simplicity. Just four steps and you're ready to go.">
+                <div class="slide-content">
+                    <h2>How It Works</h2>
+                    <p>Get started in 4 simple steps</p>
+                    <div class="cards-container">
+                        <div class="card">
+                            <div class="card-icon text-accent">1️⃣</div>
+                            <div class="card-title">Copy Folder</div>
+                            <div class="card-desc">Copy <code style="background: var(--bg-primary); padding: 0.2rem 0.5rem; border-radius: 4px;">markdown-agent/</code> to any project</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon text-accent">2️⃣</div>
+                            <div class="card-title">Run Install</div>
+                            <div class="card-desc">Execute <code style="background: var(--bg-primary); padding: 0.2rem 0.5rem; border-radius: 4px;">node install.js</code></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon text-accent">3️⃣</div>
+                            <div class="card-title">Activate</div>
+                            <div class="card-desc">Say the magic phrase: <code style="background: var(--bg-primary); padding: 0.2rem 0.5rem; border-radius: 4px;">"go baby go"</code></div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon text-accent">4️⃣</div>
+                            <div class="card-title">Watch</div>
+                            <div class="card-desc">26 agents build your feature autonomously</div>
+                        </div>
+                    </div>
+                    <div class="code-block">
+                        <span class="comment"># Just 3 commands!</span><br>
+                        <span class="command">cp</span> -r markdown-agent /path/to/project/<br>
+                        <span class="command">cd</span> /path/to/project/markdown-agent<br>
+                        <span class="command">node</span> install.js
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 5: Architecture -->
+            <div class="slide" data-notes="Here's the architecture. The orchestrator agent coordinates everything, with JSON-based state persistence and a comprehensive agent pipeline.">
+                <div class="slide-content">
+                    <h2>Architecture Overview</h2>
+                    <div style="display: flex; flex-direction: column; align-items: center; gap: 1rem; margin: 2rem 0;">
+                        <div class="card" style="max-width: 500px;">
+                            <div class="card-icon">👤</div>
+                            <div class="card-title">User Interface</div>
+                            <div class="card-desc">"go baby go" → Trigger Phrase</div>
+                        </div>
+                        <div class="arrow-down">↓</div>
+                        <div class="card" style="max-width: 500px; border-color: var(--purple);">
+                            <div class="card-icon">🎭</div>
+                            <div class="card-title">ORCHESTRATOR Agent</div>
+                            <div class="card-desc">Coordinates all agents, manages state</div>
+                        </div>
+                        <div class="arrow-down">↓</div>
+                        <div class="card" style="max-width: 500px; border-color: var(--success);">
+                            <div class="card-icon">💾</div>
+                            <div class="card-title">State Management</div>
+                            <div class="card-desc">JSON persistence + Checkpoints + Queue</div>
+                        </div>
+                        <div class="arrow-down">↓</div>
+                        <div class="card" style="max-width: 500px; border-color: var(--cyan);">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-title">26 Specialized Agents</div>
+                            <div class="card-desc">Planning • Execution • Quality • Specialized</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 6: 11-Stage Workflow -->
+            <div class="slide" data-notes="The 11-stage workflow is comprehensive. Each stage has a specialized agent, and the workflow is fully customizable.">
+                <div class="slide-content">
+                    <h2>The 11-Stage Workflow</h2>
+                    <p>Click on any stage to learn more</p>
+                    <div class="workflow-container">
+                        <div class="workflow-step" data-step="1">
+                            <div class="step-icon">📋</div>
+                            <div class="step-name">REQUIREMENTS</div>
+                        </div>
+                        <div class="workflow-step" data-step="2">
+                            <div class="step-icon">📐</div>
+                            <div class="step-name">PLANNING</div>
+                        </div>
+                        <div class="workflow-step" data-step="3">
+                            <div class="step-icon">💻</div>
+                            <div class="step-name">IMPLEMENT</div>
+                        </div>
+                        <div class="workflow-step" data-step="4">
+                            <div class="step-icon">🧪</div>
+                            <div class="step-name">VERIFY</div>
+                        </div>
+                        <div class="workflow-step" data-step="5">
+                            <div class="step-icon">👁️</div>
+                            <div class="step-name">REVIEW</div>
+                        </div>
+                        <div class="workflow-step" data-step="6">
+                            <div class="step-icon">✅</div>
+                            <div class="step-name">QUALITY</div>
+                        </div>
+                        <div class="workflow-step" data-step="7">
+                            <div class="step-icon">🔨</div>
+                            <div class="step-name">REFACTOR</div>
+                        </div>
+                        <div class="workflow-step" data-step="8">
+                            <div class="step-icon">⚡</div>
+                            <div class="step-name">PERFORM</div>
+                        </div>
+                        <div class="workflow-step" data-step="9">
+                            <div class="step-icon">🔒</div>
+                            <div class="step-name">SECURITY</div>
+                        </div>
+                        <div class="workflow-step" data-step="10">
+                            <div class="step-icon">🚀</div>
+                            <div class="step-name">DEPLOY</div>
+                        </div>
+                    </div>
+                    <div id="stageInfo" style="margin-top: 2rem; padding: 1rem; background: var(--bg-secondary); border-radius: 10px; min-height: 80px;">
+                        <p style="color: var(--text-muted);">Hover over a stage to see details</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 7: Meet the Agents -->
+            <div class="slide" data-notes="Our 26 specialized agents work together autonomously. Each has a specific role and they coordinate through the Orchestrator.">
+                <div class="slide-content">
+                    <h2>Meet the Agents</h2>
+                    <p>26 specialized agents working together autonomously</p>
+
+                    <div class="agent-category" style="margin-bottom: 1.2rem;">
+                        <div class="agent-category-title">🔧 Core Workflow</div>
+                        <div class="agent-grid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem;">
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🎭 Orchestrator</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">📋 Requirements</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🎯 Planner</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">⚠️ Critic</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">⚖️ Synthesizer</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">💻 Coder</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🧪 Tester</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">👁️ Reviewer</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🔨 Refactor</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">⚡ Performance</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🔒 Security</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🚀 Deploy</div>
+                        </div>
+                    </div>
+
+                    <div class="agent-category" style="margin-bottom: 1.2rem;">
+                        <div class="agent-category-title">✓ Quality Assurance</div>
+                        <div class="agent-grid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem;">
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🔤 Type Safety</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">✓ Validation</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">⚠️ Error Handling</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🔌 API Consistency</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🗄️ Database Safety</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">📦 File Size</div>
+                        </div>
+                    </div>
+
+                    <div class="agent-category">
+                        <div class="agent-category-title">🛠️ Support & Utility</div>
+                        <div class="agent-grid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.8rem;">
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🐛 Debugger</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">📝 Changelog</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">📋 Task Manager</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">📦 Context Manager</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🎨 UI Standards</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">📊 KPI Definitions</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">📈 KPI Tracker</div>
+                            <div class="agent-card" style="padding: 0.8rem 1rem; font-size: 0.9rem;">🎯 KRA Definitions</div>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box" style="margin-top: 1.5rem; padding: 1rem 2rem;">
+                        <p style="margin: 0; color: var(--accent); font-weight: 600;">
+                            🎯 <strong style="font-size: 1.3rem;">26 Agents</strong> • 11-Stage Workflow • Full Autonomy
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 8: State Management -->
+            <div class="slide" data-notes="State management is crucial. We use JSON files for persistence, have a queue for multiple tasks, and checkpoint system for resumption. Plus, a visual dashboard!">
+                <div class="slide-content">
+                    <h2>State Management & Persistence</h2>
+                    <p>Never lose your progress</p>
+                    <div class="two-col">
+                        <div>
+                            <div class="card" style="margin-bottom: 1rem;">
+                                <div class="card-title">📊 JSON State Tracking</div>
+                                <div class="card-desc">Every action updates state files automatically</div>
+                            </div>
+                            <div class="card" style="margin-bottom: 1rem;">
+                                <div class="card-title">🔄 Queue Management</div>
+                                <div class="card-desc">Handle multiple tasks with intelligent queuing</div>
+                            </div>
+                            <div class="card" style="margin-bottom: 1rem;">
+                                <div class="card-title">💾 Checkpoint System</div>
+                                <div class="card-desc">Resume from any stage after interruption</div>
+                            </div>
+                            <div class="card">
+                                <div class="card-title">📈 Visual Dashboard</div>
+                                <div class="card-desc">Real-time progress tracking (no server needed!)</div>
+                            </div>
+                        </div>
+                        <div class="code-block" style="font-size: 0.9rem;">
+                            <span class="comment">// session/state.json</span><br><br>
+                            {<br>
+                            &nbsp;&nbsp;<span class="string">"currentStage"</span>: {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"name"</span>: <span class="string">"IMPLEMENTATION"</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"number"</span>: <span class="keyword">3</span>,<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;<span class="string">"progress"</span>: <span class="keyword">65</span><br>
+                            &nbsp;&nbsp;},<br>
+                            &nbsp;&nbsp;<span class="string">"checkpoints"</span>: [<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="string">"stage"</span>: <span class="string">"REQUIREMENTS"</span>, <span class="string">"status"</span>: <span class="string">"complete"</span> },<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;{ <span class="string">"stage"</span>: <span class="string">"PLANNING"</span>, <span class="string">"status"</span>: <span class="string">"complete"</span> }<br>
+                            &nbsp;&nbsp;]<br>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 9: Universal Compatibility -->
+            <div class="slide" data-notes="One of our biggest advantages is universal compatibility. We support 17+ AI platforms and counting!">
+                <div class="slide-content">
+                    <h2>Universal Compatibility</h2>
+                    <p>Works with 17+ AI platforms - no lock-in!</p>
+                    <div class="platforms-grid">
+                        <div class="platform-badge"><span class="icon">🤖</span> Claude Code</div>
+                        <div class="platform-badge"><span class="icon">✨</span> Google Gemini</div>
+                        <div class="platform-badge"><span class="icon">🧠</span> OpenAI Codex</div>
+                        <div class="platform-badge"><span class="icon">🐙</span> GitHub Copilot</div>
+                        <div class="platform-badge"><span class="icon">🌟</span> Alibaba Qwen</div>
+                        <div class="platform-badge"><span class="icon">🔍</span> DeepSeek</div>
+                        <div class="platform-badge"><span class="icon">🌀</span> Mistral AI</div>
+                        <div class="platform-badge"><span class="icon">⚡</span> Aider CLI</div>
+                        <div class="platform-badge"><span class="icon">💎</span> Qoder</div>
+                        <div class="platform-badge"><span class="icon">🎮</span> Replit AI</div>
+                        <div class="platform-badge"><span class="icon">📦</span> Amazon Q</div>
+                        <div class="platform-badge"><span class="icon">🔗</span> Cohere</div>
+                        <div class="platform-badge"><span class="icon">💻</span> OpenCode</div>
+                        <div class="platform-badge"><span class="icon">🎯</span> Tabnine</div>
+                        <div class="platform-badge"><span class="icon">⚡</span> Codeium</div>
+                        <div class="platform-badge"><span class="icon">💫</span> Cursor IDE</div>
+                        <div class="platform-badge"><span class="icon">🌊</span> Windsurf IDE</div>
+                    </div>
+                    <p style="margin-top: 2rem; color: var(--accent);">And more coming soon! Future-proof your workflow.</p>
+                </div>
+            </div>
+
+            <!-- SLIDE 10: Key Features -->
+            <div class="slide" data-notes="Let's summarize the key features. Everything you need for autonomous development.">
+                <div class="slide-content">
+                    <h2>Key Features</h2>
+                    <p>Everything you need for autonomous development</p>
+                    <div class="cards-container">
+                        <div class="card">
+                            <div class="card-icon">✅</div>
+                            <div class="card-title">Autonomous Execution</div>
+                            <div class="card-desc">Agents work independently</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🎭</div>
+                            <div class="card-title">Multi-Perspective Planning</div>
+                            <div class="card-desc">Three viewpoints for better decisions</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🌊</div>
+                            <div class="card-title">Wave-Based Tasks</div>
+                            <div class="card-desc">Parallel execution when possible</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">💾</div>
+                            <div class="card-title">State Persistence</div>
+                            <div class="card-desc">Never lose your progress</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔲</div>
+                            <div class="card-title">Checkpoint System</div>
+                            <div class="card-desc">Resume from any stage</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🧪</div>
+                            <div class="card-title">Quality Assurance</div>
+                            <div class="card-desc">6 automated quality checks</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔒</div>
+                            <div class="card-title">Security Auditing</div>
+                            <div class="card-desc">Built-in vulnerability scanning</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">⚡</div>
+                            <div class="card-title">Performance Optimization</div>
+                            <div class="card-desc">Automatic speed improvements</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔌</div>
+                            <div class="card-title">Cross-Platform AI</div>
+                            <div class="card-desc">Works with 17+ AI platforms</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">📦</div>
+                            <div class="card-title">Zero Dependencies</div>
+                            <div class="card-desc">Pure markdown, no runtime</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔀</div>
+                            <div class="card-title">Git-Friendly</div>
+                            <div class="card-desc">Version control ready</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">📊</div>
+                            <div class="card-title">Visual Dashboard</div>
+                            <div class="card-desc">Track progress in real-time</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 11: Competitive Comparison -->
+            <div class="slide" data-notes="Here's how we compare to other solutions. We believe in choice, not lock-in.">
+                <div class="slide-content">
+                    <h2>Competitive Advantages</h2>
+                    <p>Why choose Markdown Agent System?</p>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Others</th>
+                                <th>Us</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>AI Lock-in</td>
+                                <td><span class="cross">✖</span> Yes</td>
+                                <td class="highlight"><span class="check">✔</span> Universal</td>
+                            </tr>
+                            <tr>
+                                <td>Setup Time</td>
+                                <td><span class="cross">✖</span> Hours</td>
+                                <td class="highlight"><span class="check">✔</span> Seconds</td>
+                            </tr>
+                            <tr>
+                                <td>Quality Checks</td>
+                                <td><span class="cross">✖</span> Manual</td>
+                                <td class="highlight"><span class="check">✔</span> Automated</td>
+                            </tr>
+                            <tr>
+                                <td>State Tracking</td>
+                                <td><span class="cross">✖</span> None</td>
+                                <td class="highlight"><span class="check">✔</span> JSON Persistence</td>
+                            </tr>
+                            <tr>
+                                <td>Resumable</td>
+                                <td><span class="cross">✖</span> No</td>
+                                <td class="highlight"><span class="check">✔</span> Checkpoints</td>
+                            </tr>
+                            <tr>
+                                <td>Transparency</td>
+                                <td><span class="cross">✖</span> Black Box</td>
+                                <td class="highlight"><span class="check">✔</span> Markdown Files</td>
+                            </tr>
+                            <tr>
+                                <td>Dependencies</td>
+                                <td><span class="cross">✖</span> Heavy</td>
+                                <td class="highlight"><span class="check">✔</span> Zero</td>
+                            </tr>
+                            <tr>
+                                <td>Offline Mode</td>
+                                <td><span class="cross">✖</span> No</td>
+                                <td class="highlight"><span class="check">✔</span> Yes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SLIDE 12: Technical Stats -->
+            <div class="slide" data-notes="Let's talk numbers. This is a substantial system built entirely in markdown.">
+                <div class="slide-content">
+                    <h2>Technical Highlights</h2>
+                    <p>Built with passion, powered by markdown</p>
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <div class="stat-value" data-target="7328">0</div>
+                            <div class="stat-label">Lines of Agent Code</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" data-target="26">0</div>
+                            <div class="stat-label">Specialized Agents</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" data-target="11">0</div>
+                            <div class="stat-label">Workflow Stages</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" data-target="17">0</div>
+                            <div class="stat-label">AI Platforms</div>
+                        </div>
+                    </div>
+                    <div class="cards-container" style="margin-top: 2rem;">
+                        <div class="card">
+                            <div class="card-title">📝 Pure Markdown</div>
+                            <div class="card-desc">No compilation needed</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">🖥️ Cross-Platform</div>
+                            <div class="card-desc">Windows, Mac, Linux</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">🚫 AI-Agnostic</div>
+                            <div class="card-desc">Future-proof design</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 13: Why Markdown? -->
+            <div class="slide" data-notes="You might be wondering - why markdown? Let me explain the thinking behind this decision.">
+                <div class="slide-content">
+                    <h2>The "Why Markdown?" Story</h2>
+                    <p>Why we chose the simplest format possible</p>
+                    <div class="cards-container">
+                        <div class="card">
+                            <div class="card-icon">🌍</div>
+                            <div class="card-title">Universal</div>
+                            <div class="card-desc">Any AI can read markdown. No special parsers needed.</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔍</div>
+                            <div class="card-title">Transparent</div>
+                            <div class="card-desc">Review every step. Learn from the agents.</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔀</div>
+                            <div class="card-title">Version Control</div>
+                            <div class="card-desc">Git-friendly diffs and merge conflict resolution.</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🚫</div>
+                            <div class="card-title">Zero Dependencies</div>
+                            <div class="card-desc">No runtime. No npm install. Works offline.</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">🔒</div>
+                            <div class="card-title">100% Secure</div>
+                            <div class="card-desc">No external APIs. No data leaves your machine.</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-icon">📦</div>
+                            <div class="card-title">Portable</div>
+                            <div class="card-desc">Copy anywhere. Works on any system.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 14: Impact & Metrics -->
+            <div class="slide" data-notes="The impact of this system is significant. Here's what we're measuring.">
+                <div class="slide-content">
+                    <h2>Project Impact & Metrics</h2>
+                    <p>Measurable improvements for development teams</p>
+                    <div class="stats-container">
+                        <div class="stat-item">
+                            <div class="stat-value">60-80%</div>
+                            <div class="stat-label">Time Saved</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">6x</div>
+                            <div class="stat-label">Quality Checks</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">10x</div>
+                            <div class="stat-label">Bug Reduction</div>
+                        </div>
+                    </div>
+                    <div class="split-container" style="margin-top: 2rem;">
+                        <div class="split-panel" style="border-color: var(--accent);">
+                            <h4 style="color: var(--accent);">🚀 Faster Onboarding</h4>
+                            <p>New team members understand workflows in hours, not days</p>
+                        </div>
+                        <div class="split-panel" style="border-color: var(--success);">
+                            <h4 style="color: var(--success);">📏 Code Consistency</h4>
+                            <p>Enforced standards across all team members and projects</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 15: Roadmap -->
+            <div class="slide" data-notes="We have exciting plans for the future. Here's what's coming next.">
+                <div class="slide-content">
+                    <h2>Future Roadmap</h2>
+                    <p>Where we're headed next</p>
+                    <div class="roadmap-container">
+                        <div class="roadmap-item">
+                            <div class="roadmap-icon">🔄</div>
+                            <div class="roadmap-text">
+                                <h4>Real-time Agent Communication</h4>
+                                <p>Agents that can coordinate and negotiate with each other</p>
+                            </div>
+                        </div>
+                        <div class="roadmap-item">
+                            <div class="roadmap-icon">📊</div>
+                            <div class="roadmap-text">
+                                <h4>Advanced Analytics Dashboard</h4>
+                                <p>Deep insights into agent performance and optimization</p>
+                            </div>
+                        </div>
+                        <div class="roadmap-item">
+                            <div class="roadmap-icon">🌐</div>
+                            <div class="roadmap-text">
+                                <h4>Web-based Task Management UI</h4>
+                                <p>Beautiful web interface for creating and managing tasks</p>
+                            </div>
+                        </div>
+                        <div class="roadmap-item">
+                            <div class="roadmap-icon">🤖</div>
+                            <div class="roadmap-text">
+                                <h4>Community Agent Marketplace</h4>
+                                <p>Share and discover agents created by the community</p>
+                            </div>
+                        </div>
+                        <div class="roadmap-item">
+                            <div class="roadmap-icon">📚</div>
+                            <div class="roadmap-text">
+                                <h4>Agent Training System</h4>
+                                <p>Customize agent behavior through training examples</p>
+                            </div>
+                        </div>
+                        <div class="roadmap-item">
+                            <div class="roadmap-icon">🔌</div>
+                            <div class="roadmap-text">
+                                <h4>Plugin System</h4>
+                                <p>Extend functionality with custom plugins</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 16: Project Structure -->
+            <div class="slide" data-notes="This slide shows the actual folder structure of our project - everything is markdown, no compilation needed.">
+                <div class="slide-content">
+                    <h2>Project Structure</h2>
+                    <p>Everything in pure markdown - zero compilation required</p>
+
+                    <pre class="code-block" style="text-align: left; font-size: 0.8rem; line-height: 1.5; padding: 1.5rem; overflow-x: auto;"><span class="comment">📁 markdown-agent/</span>
+<span class="string">├── 📁 agents/</span>              <span class="comment"># 26 specialized agent definitions</span>
+<span class="string">│   ├── orchestrator.md</span>     <span class="comment"># Main coordinator</span>
+<span class="string">│   ├── planner.md</span>          <span class="comment"># Optimistic planning</span>
+<span class="string">│   ├── critic.md</span>            <span class="comment"># Risk assessment</span>
+<span class="string">│   ├── synthesizer.md</span>       <span class="comment"># Balanced decisions</span>
+<span class="string">│   ├── coder.md</span>             <span class="comment"># Implementation</span>
+<span class="string">│   ├── tester.md</span>            <span class="comment"># Verification</span>
+<span class="string">│   ├── refactor.md</span>          <span class="comment"># Code improvement</span>
+<span class="string">│   ├── performance.md</span>       <span class="comment"># Optimization</span>
+<span class="string">│   ├── security.md</span>          <span class="comment"># Vulnerability scan</span>
+<span class="string">│   ├── deploy.md</span>            <span class="comment"># Production deployment</span>
+<span class="string">│   ├── changelog.md</span>         <span class="comment"># Documentation</span>
+<span class="string">│   └── ...</span>                  <span class="comment"># (26 total agent files)</span>
+<span class="string">├── 📁 templates/</span>            <span class="comment"># 11 stage workflow templates</span>
+<span class="string">│   ├── stage-requirements.md</span>
+<span class="string">│   ├── stage-planning.md</span>
+<span class="string">│   └── ...</span>
+<span class="string">├── 📁 session/</span>              <span class="comment"># Runtime state &amp; checkpoints</span>
+<span class="string">│   ├── data.js</span>              <span class="comment"># Dashboard data</span>
+<span class="string">│   ├── config.json</span>          <span class="comment"># Session configuration</span>
+<span class="string">│   └── tasks/</span>               <span class="comment"># Per-task state files</span>
+<span class="string">├── 📄 dashboard.html</span>        <span class="comment"># Real-time progress tracking</span>
+<span class="string">├── 📄 install.js</span>            <span class="comment"># One-click setup</span>
+<span class="string">├── 📄 CLAUDE.md</span>             <span class="comment"># Works with Claude Code</span>
+<span class="string">├── 📄 GEMINI.md</span>             <span class="comment"># Works with Google Gemini</span>
+<span class="string">├── 📄 COPILOT.md</span>            <span class="comment"># Works with GitHub Copilot</span>
+<span class="string">├── 📄 CURSOR.md</span>             <span class="comment"># Works with Cursor IDE</span>
+<span class="string">└── ...</span>                     <span class="comment"># (17+ AI platform files)</span></pre>
+
+                    <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                        📊 <strong>7,328+ lines</strong> of agent definitions | 🎯 <strong>Zero dependencies</strong> | 🚀 <strong>Ready to deploy</strong>
+                    </p>
+                </div>
+            </div>
+
+            <!-- SLIDE 17: Before vs After -->
+            <div class="slide" data-notes="This slide shows the dramatic difference between manual AI development and using our agent system.">
+                <div class="slide-content">
+                    <h2>Manual AI Development vs Markdown Agent</h2>
+                    <p>The difference is dramatic</p>
+
+                    <div class="split-container">
+                        <div class="split-panel problem">
+                            <h3>❌ WITHOUT (Manual)</h3>
+                            <ul class="feature-list" style="margin: 0;">
+                                <li>Write prompts manually every time</li>
+                                <li>Copy-paste AI responses</li>
+                                <li>Track progress in separate notes</li>
+                                <li>No quality control standards</li>
+                                <li>Locked to one AI platform</li>
+                                <li>Inconsistent code quality</li>
+                                <li><strong style="font-size: 1.1rem;">⏱️ 2-3 hours per feature</strong></li>
+                            </ul>
+                        </div>
+                        <div class="split-panel solution">
+                            <h3>✅ WITH Markdown Agent</h3>
+                            <ul class="feature-list" style="margin: 0;">
+                                <li style="color: var(--success);">Just say: "go baby go"</li>
+                                <li style="color: var(--success);">26 agents work autonomously</li>
+                                <li style="color: var(--success);">State tracked automatically</li>
+                                <li style="color: var(--success);">6 quality checks built-in</li>
+                                <li style="color: var(--success);">Works with 17+ AI platforms</li>
+                                <li style="color: var(--success);">Predictable, high-quality output</li>
+                                <li><strong style="font-size: 1.1rem; color: var(--accent);">⏱️ 5-10 minutes per feature</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="highlight-box" style="margin-top: 2rem;">
+                        <h4 style="color: var(--accent); margin-bottom: 0.5rem;">🚀 Result</h4>
+                        <p style="margin: 0;">
+                            <strong style="color: var(--text-primary);">12-24x faster</strong> development with
+                            <span style="color: var(--success);">higher quality</span> and
+                            <span style="color: var(--accent);">zero lock-in</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SLIDE 18: FAQ -->
+            <div class="slide" data-notes="This slide covers common questions from judges and audience. Click on any question to expand the answer.">
+                <div class="slide-content">
+                    <h2>Frequently Asked Questions</h2>
+                    <p>Click on any question to reveal the answer</p>
+
+                    <div class="faq-container">
+                        <!-- Technical Questions -->
+                        <div class="faq-category">
+                            <div class="faq-category-title">🔧 Technical Questions</div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">How does the markdown-based system work?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        The system uses <strong>pure markdown files</strong> to define agent behaviors, workflows, and protocols. Each agent is a markdown file that AI tools can natively read and understand. When you trigger the system with "go baby go", it reads these files and coordinates agents through an 11-stage workflow - all without any compilation or runtime dependencies.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">What AI platforms does it support?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        It's <strong>universally compatible</strong> with 17+ AI platforms including Claude Code, Google Gemini, GitHub Copilot, OpenAI Codex/GPT, Alibaba Qwen, DeepSeek, Mistral AI, Cursor IDE, Windsurf IDE, and more. If your AI tool can read markdown, it can use this system.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">Can I add my own custom agents?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        <strong>Absolutely!</strong> The system is designed to be extensible. Simply create a new markdown file in the agents/ folder following the template, define the agent's personality and instructions, and it becomes part of your workflow. No coding required - just write in markdown.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">How does state management work?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        State is managed through <strong>JSON files</strong> in the session/ folder. The system tracks which stage you're in, what's completed, and can resume from checkpoints. This means you can pause work and continue later - nothing is lost. Plus, there's a visual dashboard (no server needed) to track progress.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Business Questions -->
+                        <div class="faq-category">
+                            <div class="faq-category-title">💼 Business & Value</div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">What makes this different from existing tools?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        <strong>Three key differentiators:</strong><br>
+                                        1. <strong>AI-agnostic</strong> - Works with any AI tool, no vendor lock-in<br>
+                                        2. <strong>Zero dependencies</strong> - Pure markdown, no runtime, no compilation<br>
+                                        3. <strong>Transparent</strong> - Every step is readable in markdown, not a black box<br><br>
+                                        Unlike tools that require specific platforms or have opaque systems, ours is open, portable, and future-proof.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">What's the learning curve?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        <strong>Under 1 hour to be productive!</strong> Installation takes seconds - just copy the folder and run install.js. To use it, say "go baby go" and describe what you want. The agents handle the rest. For customizing agents, basic markdown knowledge is all you need.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">Can this work with existing projects?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        <strong>Yes!</strong> The markdown-agent/ folder is self-contained and doesn't interfere with your existing codebase. Simply copy it into any project and you're ready. It works with any programming language, framework, or project structure.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Practical Questions -->
+                        <div class="faq-category">
+                            <div class="faq-category-title">🚀 Practical Questions</div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">How long does it take to set up?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        <strong>Under 2 minutes.</strong> Three commands: copy folder, navigate to it, run install.js. That's it. No API keys to configure, no servers to set up, no dependencies to install. It just works.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">What happens if an agent makes a mistake?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        The system has <strong>built-in verification and quality checks</strong>. Multiple agents review each other's work - the Tester agent is specifically skeptical and looks for bugs. The SECURITY agent scans for vulnerabilities. If issues are found, they're flagged before deployment. Plus, the checkpoint system lets you roll back to any stage.
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <div class="faq-question">
+                                    <span class="faq-question-text">Is this open source?</span>
+                                    <span class="faq-toggle"></span>
+                                </div>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-text">
+                                        <strong>Yes!</strong> The entire system is open source. You can fork it, customize it, contribute agents back to the community, and even create your own agent marketplace. We believe in transparent, collaborative AI tooling.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 2rem; color: var(--text-muted); font-size: 0.9rem;">
+                        <kbd style="background: var(--bg-tertiary); padding: 0.2rem 0.5rem; border-radius: 4px;">←</kbd> Back to slides
+                    </p>
+                </div>
+            </div>
+
+            <!-- SLIDE 19: Live Demo -->
+            <div class="slide" data-notes="This slide shows a simulated live demo of how the agent system works. Watch the terminal animation!">
+                <div class="slide-content">
+                    <h2>🚀 Live Demo Preview</h2>
+                    <p>See how Markdown Agent works in real-time</p>
+
+                    <div id="demoTerminal" class="demo-terminal">
+                        <div class="terminal-header">
+                            <div class="terminal-buttons">
+                                <span class="terminal-btn close"></span>
+                                <span class="terminal-btn minimize"></span>
+                                <span class="terminal-btn maximize"></span>
+                            </div>
+                            <div class="terminal-title">~/project — AI CLI</div>
+                        </div>
+                        <div class="terminal-body" id="terminalBody">
+                            <div class="terminal-line">
+                                <span class="terminal-prompt">$</span>
+                                <span class="terminal-input" id="terminalInput"></span><span class="cursor">▋</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p style="margin-top: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                        Watch the demo replay — Press <kbd style="background: var(--bg-tertiary); padding: 0.2rem 0.5rem; border-radius: 4px;">R</kbd> to replay
+                    </p>
+                </div>
+            </div>
+
+            <!-- SLIDE 20: Thank You -->
+            <div class="slide" data-notes="Thank you for your attention! We're happy to take questions now.">
+                <div class="slide-content">
+                    <div class="logo-container" style="width: 120px; height: 120px;">
+                        <svg class="logo-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Outer ring with rotation -->
+                            <circle cx="60" cy="60" r="55" stroke="url(#grad2)" stroke-width="2" fill="none" opacity="0.2" style="transform-origin: center;">
+                                <animateTransform attributeName="transform" type="rotate" from="0 60 60" to="360 60 60" dur="20s" repeatCount="indefinite"/>
+                            </circle>
+                            <!-- Middle ring -->
+                            <circle cx="60" cy="60" r="42" stroke="url(#grad2)" stroke-width="2" fill="none" opacity="0.4"/>
+                            <!-- Brain/AI Icon -->
+                            <g transform="translate(60,60)">
+                                <!-- Brain shape -->
+                                <path d="M-20 -15 Q-25 -5 -20 5 Q-15 15 -5 15 Q5 15 10 5 Q15 -5 10 -15 Q5 -25 -5 -25 Q-15 -25 -20 -15"
+                                      fill="url(#grad2)" opacity="0.3"/>
+                                <path d="M20 -15 Q25 -5 20 5 Q15 15 5 15 Q-5 15 -10 5 Q-15 -5 -10 -15 Q-5 -25 5 -25 Q15 -25 20 -15"
+                                      fill="url(#grad2)" opacity="0.3"/>
+                                <!-- Neural connections -->
+                                <line x1="-15" y1="-5" x2="15" y2="-5" stroke="#58a6ff" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="-15" y1="5" x2="15" y2="5" stroke="#58a6ff" stroke-width="1.5" opacity="0.5"/>
+                                <line x1="0" y1="-15" x2="0" y2="15" stroke="#58a6ff" stroke-width="1.5" opacity="0.5"/>
+                                <!-- Nodes -->
+                                <circle cx="-15" cy="-5" r="3" fill="#58a6ff">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite"/>
+                                </circle>
+                                <circle cx="15" cy="-5" r="3" fill="#a371f7">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="0.5s"/>
+                                </circle>
+                                <circle cx="-15" cy="5" r="3" fill="#a371f7">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="1s"/>
+                                </circle>
+                                <circle cx="15" cy="5" r="3" fill="#58a6ff">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="1.5s"/>
+                                </circle>
+                                <circle cx="0" cy="-10" r="3" fill="#58a6ff">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="0.3s"/>
+                                </circle>
+                                <circle cx="0" cy="10" r="3" fill="#a371f7">
+                                    <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="0.8s"/>
+                                </circle>
+                            </g>
+                            <!-- Checkmark overlay -->
+                            <path d="M35 60 L50 75 L75 45" stroke="#58a6ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none" style="filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.5));">
+                                <animate attributeName="stroke-dasharray" from="0,100" to="100,0" dur="1.5s" fill="freeze" begin="0.5s"/>
+                            </path>
+                            <defs>
+                                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#58a6ff"/>
+                                    <stop offset="50%" style="stop-color:#7974ff"/>
+                                    <stop offset="100%" style="stop-color:#a371f7"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <h1>Thank You!</h1>
+                    <p class="tagline">Questions? Let's discuss!</p>
+
+                    <!-- Time Savings Highlight -->
+                    <div style="margin: 2rem auto; padding: 1.5rem 2rem; background: linear-gradient(135deg, rgba(88, 166, 255, 0.1), rgba(163, 113, 247, 0.1)); border: 1px solid var(--accent); border-radius: 16px; text-align: center; max-width: 500px;">
+                        <div style="font-size: 3rem; font-weight: bold; color: var(--success); margin-bottom: 0.5rem;">60-80%</div>
+                        <div style="color: var(--text-secondary); font-size: 1.1rem;">Time saved per feature 🚀</div>
+                    </div>
+
+                    <div style="margin-top: 2rem; margin-bottom: 2rem;">
+                        <h3 style="color: var(--accent); margin-bottom: 1rem;">🎭 Team M-AI-RACLES</h3>
+                        <div class="cards-container" style="justify-content: center;">
+                            <div class="card" style="min-width: 200px; padding: 1rem 1.5rem;">
+                                <div class="card-title" style="font-size: 1.1rem;">Mukund Rana</div>
+                            </div>
+                            <div class="card" style="min-width: 200px; padding: 1rem 1.5rem;">
+                                <div class="card-title" style="font-size: 1.1rem;">Ritesh Macwan</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GitHub CTA with QR -->
+                    <div class="cards-container" style="justify-content: center; margin-top: 1rem;">
+                        <div class="card" style="min-width: 320px; text-align: center;">
+                            <div class="card-title">📦 Star us on GitHub!</div>
+                            <div class="card-desc" style="margin: 1rem 0;">
+                                <a href="https://github.com/mukundrana/markdown-agent" target="_blank" style="color: var(--accent); text-decoration: none; font-weight: 600;">github.com/mukundrana/markdown-agent</a>
+                            </div>
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1rem;">
+                                <!-- Real QR Code for GitHub (embedded base64 - single file, works offline!) -->
+                                <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMgAAADIAQMAAACXljzdAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAABi0lEQVRYhdWXO5KEMAxEmyJw6CNwFG429tF8FB+BkIBCq5bM7uxuTYxwMAW8CfxpdcvAx1GEA0jbWs95xyqTfTkDkJdNcDrSxj/t9sxPwcks0gufx3rqdGSR+gSiO7+tuvOpP4lg5v5jpmoeQVw7suurHKn/U9WNxKuRujaFLK38rtOYZAzd5QZdlZI/NheScD2d7pEbnURP4Zw347HJbkrRUxBV9yL06+7aiUs0X0bKAO7XQO5+DpEJ4LNXxQOunTcF3U0Wlt+3K9uHGpvQMbrvMmDdhgyFRCaeIup5WTT7krRyglmC0ORliuaqGtdgB6LrKbEJWHzD+fiNWbNdqgpLiqbiom+q+GrOVwcPQLjXi6c05+65bTUZnYw6rHIYt9/ghHUonoDs7NxD6IKRiY9pOJ/WJBNQJDgpZhrWg7rWR4eP0MR7f9VObsyahZ1HHp54O7luera/qXsbur7fAeOS46frhCXKI4h4n0HiA7GJacdvq1fn4feSyKTY7I1od6Tdfr1SJjL5OL4ALUqxbQJFbl4AAAAASUVORK5CYII=" alt="Scan to visit GitHub" width="90" height="90" style="border-radius: 8px; border: 2px solid var(--border);">
+                                <div style="text-align: left; font-size: 0.85rem; color: var(--text-muted);">
+                                    ✨ Copy & paste<br>
+                                    🚀 Works offline<br>
+                                    🔒 100% secure
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 3rem; color: var(--text-muted); font-size: 1rem;">
+                        Press <kbd style="background: var(--bg-tertiary); padding: 0.2rem 0.5rem; border-radius: 4px;">←</kbd> to review slides
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Navigation Controls -->
+    <div class="nav-controls">
+        <button class="nav-btn" id="prevBtn" title="Previous (←)">←</button>
+        <span class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">20</span></span>
+        <button class="nav-btn" id="nextBtn" title="Next (→)">→</button>
+    </div>
+
+    <script>
+        // ===== Presentation State =====
+        const state = {
+            currentSlide: 0,
+            totalSlides: 20,
+            presenterNotesVisible: false,
+            isFullscreen: false
+        };
+
+        // ===== DOM Elements =====
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const slideIndicators = document.getElementById('slideIndicators');
+        const currentSlideEl = document.getElementById('currentSlide');
+        const totalSlidesEl = document.getElementById('totalSlides');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const presenterNotes = document.getElementById('presenterNotes');
+        const presenterToggle = document.getElementById('presenterToggle');
+        const fullscreenToggle = document.getElementById('fullscreenToggle');
+        const shortcutsToggle = document.getElementById('shortcutsToggle');
+        const shortcutsModal = document.getElementById('shortcutsModal');
+        const shortcutsOverlay = document.getElementById('shortcutsOverlay');
+
+        // ===== Initialize =====
+        function init() {
+            totalSlidesEl.textContent = state.totalSlides;
+            createIndicators();
+            updateSlide();
+            setupEventListeners();
+            setupWorkflowInteractions();
+            setupFAQ();
+            initNeuralNetwork();
+            animateStats();
+            animateWorkflowStages();
+        }
+
+        // ===== Create Slide Indicators =====
+        function createIndicators() {
+            slides.forEach((_, index) => {
+                const indicator = document.createElement('div');
+                indicator.className = 'indicator' + (index === 0 ? ' active' : '');
+                indicator.addEventListener('click', () => goToSlide(index));
+                slideIndicators.appendChild(indicator);
+            });
+        }
+
+        // ===== Update Slide =====
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active', 'prev');
+                if (index === state.currentSlide) {
+                    slide.classList.add('active');
+                } else if (index < state.currentSlide) {
+                    slide.classList.add('prev');
+                }
+            });
+
+            // Update indicators
+            document.querySelectorAll('.indicator').forEach((indicator, index) => {
+                indicator.classList.toggle('active', index === state.currentSlide);
+            });
+
+            // Update counter
+            currentSlideEl.textContent = state.currentSlide + 1;
+
+            // Update progress bar
+            progressBar.style.width = ((state.currentSlide + 1) / state.totalSlides * 100) + '%';
+
+            // Update presenter notes
+            const activeSlide = slides[state.currentSlide];
+            const notes = activeSlide.dataset.notes || 'No notes for this slide.';
+            presenterNotes.textContent = notes;
+
+            // Animate stats on slides with stat values
+            animateStats();
+
+            // Trigger workflow animation on slide 6
+            if (state.currentSlide === 5) {
+                animateWorkflowStages();
+            }
+
+            // Start demo animation on slide 19 (index 18) - only once per slide visit
+            if (state.currentSlide === 18 && !window.demoTriggered) {
+                window.demoTriggered = true;
+                resetDemo();
+                setTimeout(startDemo, 800);
+            } else if (state.currentSlide !== 18) {
+                // Reset trigger when leaving demo slide
+                window.demoTriggered = false;
+            }
+        }
+
+        // ===== Navigation Functions =====
+        function nextSlide() {
+            if (state.currentSlide < state.totalSlides - 1) {
+                state.currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (state.currentSlide > 0) {
+                state.currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function goToSlide(index) {
+            if (index >= 0 && index < state.totalSlides) {
+                state.currentSlide = index;
+                updateSlide();
+            }
+        }
+
+        // ===== Event Listeners =====
+        function setupEventListeners() {
+            // Button clicks
+            prevBtn.addEventListener('click', prevSlide);
+            nextBtn.addEventListener('click', nextSlide);
+
+            // Keyboard navigation
+            document.addEventListener('keydown', (e) => {
+                switch(e.key) {
+                    case 'ArrowRight':
+                    case ' ':
+                        e.preventDefault();
+                        nextSlide();
+                        break;
+                    case 'ArrowLeft':
+                        e.preventDefault();
+                        prevSlide();
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        const activeSlide = slides[state.currentSlide];
+                        activeSlide.scrollBy({ top: -200, behavior: 'smooth' });
+                        break;
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        const currentSlide = slides[state.currentSlide];
+                        currentSlide.scrollBy({ top: 200, behavior: 'smooth' });
+                        break;
+                    case 'Home':
+                        e.preventDefault();
+                        goToSlide(0);
+                        break;
+                    case 'End':
+                        e.preventDefault();
+                        goToSlide(state.totalSlides - 1);
+                        break;
+                    case 'p':
+                    case 'P':
+                        e.preventDefault();
+                        togglePresenterNotes();
+                        break;
+                    case 'r':
+                    case 'R':
+                        // Only replay if on demo slide
+                        if (state.currentSlide === 18) { // Slide 19 is index 18
+                            e.preventDefault();
+                            resetDemo();
+                            setTimeout(startDemo, 300);
+                        }
+                        break;
+                    case 'f':
+                    case 'F':
+                        e.preventDefault();
+                        toggleFullscreen();
+                        break;
+                    case '?':
+                        e.preventDefault();
+                        toggleShortcuts();
+                        break;
+                    case 'Escape':
+                        closeAllModals();
+                        if (state.isFullscreen) {
+                            document.exitFullscreen();
+                        }
+                        break;
+                }
+            });
+
+            // Click on slide (excluding interactive elements)
+            slides.forEach((slide, index) => {
+                slide.addEventListener('click', (e) => {
+                    if (e.target.closest('.workflow-step') || e.target.closest('.card') || e.target.closest('.agent-card') || e.target.closest('.faq-item')) {
+                        return;
+                    }
+                    // Click on right half goes next, left half goes prev
+                    const rect = slide.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    if (x > rect.width / 2) {
+                        nextSlide();
+                    } else {
+                        prevSlide();
+                    }
+                });
+            });
+
+            // Presenter notes toggle
+            presenterToggle.addEventListener('click', togglePresenterNotes);
+
+            // Fullscreen toggle
+            fullscreenToggle.addEventListener('click', toggleFullscreen);
+
+            // Shortcuts toggle
+            shortcutsToggle.addEventListener('click', toggleShortcuts);
+            shortcutsOverlay.addEventListener('click', toggleShortcuts);
+
+            // Fullscreen change detection
+            document.addEventListener('fullscreenchange', () => {
+                state.isFullscreen = !!document.fullscreenElement;
+                fullscreenToggle.textContent = state.isFullscreen ? '⛶' : '⛶';
+            });
+        }
+
+        // ===== Close All Modals =====
+        function closeAllModals() {
+            shortcutsModal.classList.remove('visible');
+            shortcutsOverlay.classList.remove('visible');
+        }
+
+        // ===== Toggle Presenter Notes =====
+        function togglePresenterNotes() {
+            state.presenterNotesVisible = !state.presenterNotesVisible;
+            presenterNotes.classList.toggle('visible', state.presenterNotesVisible);
+            presenterToggle.textContent = state.presenterNotesVisible ? '📋' : '📝';
+        }
+
+        // ===== Toggle Fullscreen =====
+        function toggleFullscreen() {
+            if (state.isFullscreen) {
+                document.exitFullscreen();
+            } else {
+                document.documentElement.requestFullscreen();
+            }
+        }
+
+        // ===== Toggle Shortcuts Modal =====
+        function toggleShortcuts() {
+            const isVisible = shortcutsModal.classList.contains('visible');
+            shortcutsModal.classList.toggle('visible', !isVisible);
+            shortcutsOverlay.classList.toggle('visible', !isVisible);
+        }
+
+        // ===== Demo Terminal Animation =====
+        let demoStarted = false;
+        let demoTimeouts = [];
+
+        const demoSequence = [
+            // Initial activation
+            { type: 'input', text: 'go baby go', delay: 400 },
+            { type: 'output', text: '✅ AGENT SYSTEM ACTIVATED', class: 'terminal-success', delay: 100 },
+            { type: 'output', text: '📋 QUEUE: EMPTY | 💡 READY FOR TASKS', class: 'terminal-info', delay: 150 },
+            { type: 'output', text: '', class: '', delay: 100 },
+
+            // User adds a task
+            { type: 'input', text: 'Add task: build a login page', delay: 500 },
+            { type: 'output', text: '📝 Task queued as <span class="terminal-agent">task-1</span> | Type "execute" to start', class: 'terminal-info', delay: 200 },
+            { type: 'output', text: '', class: '', delay: 150 },
+
+            // User executes
+            { type: 'input', text: 'execute', delay: 400 },
+            { type: 'output', text: '🚀 STARTING TASK EXECUTION | task-1 | standard workflow', class: 'terminal-info', delay: 150 },
+            { type: 'output', text: '', class: '', delay: 100 },
+
+            // Stage 1: Requirements
+            { type: 'output', text: '<span class="terminal-stage">STAGE 1: REQUIREMENTS</span> 📋 <span class="terminal-agent">REQUIREMENTS-GATHERER</span>', class: 'terminal-output', delay: 200 },
+            { type: 'output', text: '  ✓ Requirements documented | ✓ Checkpoint created', class: 'terminal-success', delay: 100 },
+            { type: 'output', text: '', class: '', delay: 80 },
+
+            // Stage 2: Planning
+            { type: 'output', text: '<span class="terminal-stage">STAGE 2: PLANNING</span>', class: 'terminal-output', delay: 200 },
+            { type: 'output', text: '  🎯 PLANNER ✓ | ⚠️ CRITIC ✓ | ⚖️ SYNTHESIZER ✓', class: 'terminal-output', delay: 100 },
+            { type: 'output', text: '', class: '', delay: 80 },
+
+            // Stage 3: Implementation
+            { type: 'output', text: '<span class="terminal-stage">STAGE 3: IMPLEMENTATION</span> 💻 <span class="terminal-agent">CODER</span>', class: 'terminal-output', delay: 200 },
+            { type: 'output', text: '  ✓ login.tsx | ✓ LoginForm.tsx | ✓ useAuth.ts', class: 'terminal-success', delay: 100 },
+            { type: 'output', text: '', class: '', delay: 80 },
+
+            // Stage 4: Verification
+            { type: 'output', text: '<span class="terminal-stage">STAGE 4: VERIFICATION</span> 🧪 <span class="terminal-agent">TESTER</span>', class: 'terminal-output', delay: 200 },
+            { type: 'output', text: '  ✓ 12/12 tests passing', class: 'terminal-success', delay: 100 },
+            { type: 'output', text: '', class: '', delay: 80 },
+
+            // Stages 5-9 summarized
+            { type: 'output', text: '<span class="terminal-stage">STAGES 5-9: QUALITY</span>', class: 'terminal-output', delay: 200 },
+            { type: 'output', text: '  👁️ REVIEWER ✓ | 📝 Type ✓ | ✓ Validate ✓', class: 'terminal-output', delay: 100 },
+            { type: 'output', text: '  ⚠️ Errors ✓ | 🔌 API ✓ | 🗄️ DB ✓ | 📦 Size ✓', class: 'terminal-output', delay: 100 },
+            { type: 'output', text: '  🔨 REFACTOR ✓ | ⚡ PERF ✓ | 🔒 SECURITY: 0 vulns ✓', class: 'terminal-success', delay: 150 },
+            { type: 'output', text: '', class: '', delay: 100 },
+
+            // Stage 10: Deploy
+            { type: 'output', text: '<span class="terminal-stage">STAGE 10: DEPLOY</span> 🚀 <span class="terminal-agent">DEPLOY</span>', class: 'terminal-output', delay: 200 },
+            { type: 'output', text: '  ✓ Build ✓ | ✓ Tests ✓ | ✓ Deployed | 📝 CHANGELOG ✓', class: 'terminal-success', delay: 150 },
+            { type: 'output', text: '', class: '', delay: 150 },
+
+            // Completion
+            { type: 'output', text: '✨ TASK COMPLETE! ✨', class: 'terminal-success', delay: 250 },
+            { type: 'output', text: '📊 26 agents • 11 stages • 3 files • 17 tests • 0 errors', class: 'terminal-info', delay: 200 },
+            { type: 'output', text: '🎭 <span class="terminal-agent">ORCHESTRATOR</span>: All tasks complete!', class: 'terminal-success', delay: 200 },
+            { type: 'output', text: '', class: '', delay: 100 },
+            { type: 'output', text: '$ <span class="cursor">▋</span>', class: 'terminal-prompt', delay: 0 }
+        ];
+
+        function startDemo() {
+            const terminalBody = document.getElementById('terminalBody');
+            if (!terminalBody || demoStarted) return;
+
+            demoStarted = true;
+            terminalBody.innerHTML = '';
+
+            let currentIndex = 0;
+            let cumulativeDelay = 0;
+
+            function playNext() {
+                if (currentIndex >= demoSequence.length) {
+                    demoStarted = false;
+                    return;
+                }
+
+                const item = demoSequence[currentIndex];
+                cumulativeDelay += item.delay;
+
+                const timeoutId = setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'terminal-line';
+
+                    if (item.type === 'input') {
+                        line.innerHTML = `<span class="terminal-prompt">$</span><span class="terminal-input">${item.text}</span>`;
+                        terminalBody.appendChild(line);
+
+                        // After input, add a new line for output
+                        const inputTimeout = setTimeout(() => {
+                            const inputLine = document.createElement('div');
+                            inputLine.className = 'terminal-line';
+                            inputLine.innerHTML = '<span class="terminal-prompt">$</span><span class="terminal-input" id="terminalInput"></span><span class="cursor">▋</span>';
+                            terminalBody.appendChild(inputLine);
+                            terminalBody.scrollTop = terminalBody.scrollHeight;
+                        }, item.text.length * 50 + 400);
+                        demoTimeouts.push(inputTimeout);
+                    } else {
+                        const lastInput = terminalBody.querySelector('.terminal-input:last-of-type');
+                        if (lastInput && lastInput.id === 'terminalInput') {
+                            lastInput.parentElement.remove();
+                        }
+                        line.innerHTML = `<span class="${item.class}">${item.text}</span>`;
+                        terminalBody.appendChild(line);
+                    }
+
+                    terminalBody.scrollTop = terminalBody.scrollHeight;
+                    currentIndex++;
+                    playNext();
+                }, cumulativeDelay);
+                demoTimeouts.push(timeoutId);
+            }
+
+            playNext();
+        }
+
+        function resetDemo() {
+            // Clear all pending timeouts
+            demoTimeouts.forEach(timeoutId => clearTimeout(timeoutId));
+            demoTimeouts = [];
+            demoStarted = false;
+            const terminalBody = document.getElementById('terminalBody');
+            if (terminalBody) {
+                terminalBody.innerHTML = '<div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-input" id="terminalInput"></span><span class="cursor">▋</span></div>';
+            }
+        }
+
+        // ===== Neural Network Animation =====
+        function initNeuralNetwork() {
+            const canvas = document.getElementById('neuralCanvas');
+            const ctx = canvas.getContext('2d');
+
+            let width, height;
+            let nodes = [];
+            let mouseX = 0, mouseY = 0;
+
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+            }
+
+            function createNodes() {
+                nodes = [];
+                const nodeCount = Math.floor((width * height) / 25000); // Responsive node count
+                for (let i = 0; i < nodeCount; i++) {
+                    nodes.push({
+                        x: Math.random() * width,
+                        y: Math.random() * height,
+                        vx: (Math.random() - 0.5) * 0.5,
+                        vy: (Math.random() - 0.5) * 0.5,
+                        radius: Math.random() * 2 + 1,
+                        pulsePhase: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+
+                // Update and draw connections
+                const connectionDistance = 150;
+                const mouseDistance = 200;
+
+                for (let i = 0; i < nodes.length; i++) {
+                    const node = nodes[i];
+
+                    // Update position
+                    node.x += node.vx;
+                    node.y += node.vy;
+                    node.pulsePhase += 0.02;
+
+                    // Bounce off edges
+                    if (node.x < 0 || node.x > width) node.vx *= -1;
+                    if (node.y < 0 || node.y > height) node.vy *= -1;
+
+                    // Mouse attraction
+                    const dx = mouseX - node.x;
+                    const dy = mouseY - node.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < mouseDistance) {
+                        node.vx += dx * 0.0001;
+                        node.vy += dy * 0.0001;
+                    }
+
+                    // Draw connections
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const other = nodes[j];
+                        const dx = other.x - node.x;
+                        const dy = other.y - node.y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+
+                        if (dist < connectionDistance) {
+                            const opacity = (1 - dist / connectionDistance) * 0.3;
+                            ctx.beginPath();
+                            ctx.moveTo(node.x, node.y);
+                            ctx.lineTo(other.x, other.y);
+                            ctx.strokeStyle = `rgba(88, 166, 255, ${opacity})`;
+                            ctx.lineWidth = 0.5;
+                            ctx.stroke();
+                        }
+                    }
+
+                    // Draw node
+                    const pulse = Math.sin(node.pulsePhase) * 0.3 + 1;
+                    const radius = node.radius * pulse;
+
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(88, 166, 255, 0.6)';
+                    ctx.fill();
+
+                    // Glow effect
+                    const gradient = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, radius * 3);
+                    gradient.addColorStop(0, 'rgba(88, 166, 255, 0.2)');
+                    gradient.addColorStop(1, 'rgba(88, 166, 255, 0)');
+                    ctx.beginPath();
+                    ctx.arc(node.x, node.y, radius * 3, 0, Math.PI * 2);
+                    ctx.fillStyle = gradient;
+                    ctx.fill();
+                }
+
+                requestAnimationFrame(draw);
+            }
+
+            // Mouse tracking
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            // Initialize
+            resize();
+            createNodes();
+            draw();
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                resize();
+                createNodes();
+            });
+        }
+
+        // ===== Workflow Interactions =====
+        function setupWorkflowInteractions() {
+            const workflowSteps = document.querySelectorAll('.workflow-step');
+            const stageInfo = document.getElementById('stageInfo');
+
+            const stageDescriptions = {
+                1: { icon: '📋', title: 'REQUIREMENTS', desc: 'Gather detailed specifications, user stories, and acceptance criteria for the task.' },
+                2: { icon: '📐', title: 'PLANNING', desc: 'Multi-perspective planning with Optimistic, Cautious, and Balanced views.' },
+                3: { icon: '💻', title: 'IMPLEMENTATION', desc: 'Write code wave-by-wave with atomic commits and state tracking.' },
+                4: { icon: '🧪', title: 'VERIFICATION', desc: 'Skeptical testing - verify everything, question assumptions, find bugs.' },
+                5: { icon: '👁️', title: 'REVIEW', desc: 'Code review checking readability, maintainability, and best practices.' },
+                6: { icon: '✅', title: 'QUALITY CHECK', desc: 'Six quality agents: Type Safety, Validation, Error Handling, API, Database, File Size.' },
+                7: { icon: '🔨', title: 'REFACTOR', desc: 'Improve code structure, eliminate duplication, enhance maintainability.' },
+                8: { icon: '⚡', title: 'PERFORMANCE', desc: 'Optimize speed, reduce bundle size, identify bottlenecks.' },
+                9: { icon: '🔒', title: 'SECURITY', desc: 'Find vulnerabilities, check OWASP top 10, ensure secure coding.' },
+                10: { icon: '🚀', title: 'DEPLOY', desc: 'Automated deployment with rollback capability and production monitoring.' }
+            };
+
+            workflowSteps.forEach(step => {
+                step.addEventListener('mouseenter', () => {
+                    const stepNum = parseInt(step.dataset.step);
+                    const info = stageDescriptions[stepNum];
+                    if (info && stageInfo) {
+                        stageInfo.innerHTML = `<span style="font-size: 2rem;">${info.icon}</span><h4 style="margin: 0.5rem 0;">${info.title}</h4><p style="margin: 0;">${info.desc}</p>`;
+                    }
+                    step.classList.add('active');
+                });
+
+                step.addEventListener('mouseleave', () => {
+                    step.classList.remove('active');
+                    if (stageInfo) {
+                        stageInfo.innerHTML = '<p style="color: var(--text-muted);">Hover over a stage to see details</p>';
+                    }
+                });
+
+                step.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const stepNum = parseInt(step.dataset.step);
+                    // Toggle flip animation
+                    step.classList.toggle('flipped');
+                });
+            });
+        }
+
+        // ===== Animate Workflow Stages =====
+        function animateWorkflowStages() {
+            const workflowSteps = document.querySelectorAll('.workflow-step');
+            workflowSteps.forEach((step, index) => {
+                setTimeout(() => {
+                    step.classList.add('animating');
+                    setTimeout(() => {
+                        step.classList.remove('animating');
+                    }, 600);
+                }, index * 100);
+            });
+        }
+
+        // ===== Setup FAQ Accordion =====
+        function setupFAQ() {
+            const faqItems = document.querySelectorAll('.faq-item');
+
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question');
+
+                question.addEventListener('click', (e) => {
+                    e.stopPropagation();
+
+                    // Close other items in the same category
+                    const parentCategory = item.closest('.faq-category');
+                    const siblings = parentCategory.querySelectorAll('.faq-item');
+
+                    siblings.forEach(sibling => {
+                        if (sibling !== item) {
+                            sibling.classList.remove('active');
+                        }
+                    });
+
+                    // Toggle current item
+                    item.classList.toggle('active');
+                });
+            });
+        }
+
+        // ===== Animate Stats =====
+        function animateStats() {
+            const statValues = document.querySelectorAll('.stat-value[data-target]');
+            statValues.forEach(stat => {
+                // Reset animation
+                stat.classList.remove('animated');
+
+                const target = parseInt(stat.dataset.target);
+                const duration = 2000;
+                const start = performance.now();
+                const startValue = 0;
+
+                const animate = (currentTime) => {
+                    const elapsed = currentTime - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const currentValue = Math.floor(startValue + (target - startValue) * eased);
+                    stat.textContent = currentValue.toLocaleString();
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        stat.textContent = target.toLocaleString();
+                        stat.classList.add('animated');
+                    }
+                };
+                requestAnimationFrame(animate);
+            });
+        }
+
+        // ===== Touch/Swipe Support =====
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, { passive: true });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const diff = touchStartX - touchEndX;
+            if (Math.abs(diff) > swipeThreshold) {
+                if (diff > 0) {
+                    nextSlide();
+                } else {
+                    prevSlide();
+                }
+            }
+        }
+
+        // ===== Initialize on Load =====
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
