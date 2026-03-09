@@ -1,7 +1,8 @@
 ---
-protocol_version: "1.0.0"
+protocol_version: "2.0.0"
 enforcement_level: "MANDATORY"
 created: "2026-03-07"
+updated: "2026-03-09"
 purpose: "Ensure all agents are properly activated during workflow execution"
 ---
 
@@ -20,12 +21,50 @@ During workflow execution, AI models tend to:
 - Shortcut stages by doing work directly
 - Miss logging agent activations
 - Not follow agent-specific instructions
+- Skip checkpoints or create them all at once
+- Complete stages unrealistically fast
+- Skip DEPLOY stage
 
 **This protocol prevents all of the above.**
 
 ---
 
-## Mandatory Activation Sequence
+## MANDATORY RULES
+
+### RULE: CHECKPOINT AFTER EVERY STAGE
+
+**When an agent completes their stage, they MUST:**
+
+1. ✅ CREATE checkpoint in `checkpoints.json`
+2. ✅ APPEND completion log entry to `log.json`
+3. ✅ UPDATE `state.json` with next stage
+4. ✅ Use DIFFERENT timestamp than previous stage
+5. ✅ READ next agent file
+6. ✅ TRIGGER next agent
+
+**❌ FORBIDDEN:**
+- Saying "Stage complete" without creating checkpoint
+- Creating all checkpoints at the end
+- Using same timestamp for multiple stages
+
+### RULE: MINIMUM TIME PER STAGE
+
+**Each stage MUST take minimum time:**
+
+| Stage | Min Time | What Happens During This Time |
+|-------|----------|-------------------------------|
+| PLANNING | 2+ min | Read requirements, create plan, review, synthesize |
+| IMPLEMENTATION | 3+ min | Create/modify files properly |
+| VERIFICATION | 1+ min | Write and run tests |
+| REVIEW | 1+ min | Review code quality |
+| SECURITY | 1+ min | Scan for vulnerabilities |
+| DEPLOY | 1+ min | Pre-deployment checks, deployment |
+
+**If you complete a stage in 0 seconds, YOU SHORTCUT.**
+
+---
+
+## MANDATORY ACTIVATION SEQUENCE
 
 ### Before ANY Stage Execution
 
@@ -43,10 +82,15 @@ During workflow execution, AI models tend to:
 ┌─────────────────────────────────────────────────────────────┐
 │  STEP 2: LOG ACTIVATION (MANDATORY)                         │
 │  ─────────────────────────────────────────────────────────  │
-│  Add entry to session/log.md:                               │
-│  "### [TIMESTAMP] [AGENT_NAME] Agent Activated"             │
-│  "**Action**: Starting [STAGE_NAME] stage"                  │
-│  "**Status**: ACTIVE"                                       │
+│  Add entry to session/tasks/task-N/log.md:                   │
+│  {                                                         │
+│    "id": "log-{{NEXT_NUMBER}}",                             │
+│    "timestamp": "{{ISO_TIMESTAMP}}",                        │
+│    "agent": "[AGENT_NAME]",                                   │
+│    "stage": "[STAGE_NAME]",                                 │
+│    "action": "[STAGE] started",                              │
+│    "status": "in_progress"                                  │
+│  }                                                         │
 └─────────────────────────────────────────────────────────────┘
                             │
                             ▼
@@ -71,16 +115,35 @@ During workflow execution, AI models tend to:
 ┌─────────────────────────────────────────────────────────────┐
 │  STEP 5: LOG COMPLETION (MANDATORY)                         │
 │  ─────────────────────────────────────────────────────────  │
-│  Add entry to session/log.md:                               │
-│  "### [TIMESTAMP] [AGENT_NAME] Agent Complete"              │
-│  "**Action**: [What was accomplished]"                      │
-│  "**Status**: SUCCESS"                                      │
-│  "**Files**: [List of files created/modified]"              │
+│  Add entry to session/tasks/task-N/log.md:                   │
+│  {                                                         │
+│    "id": "log-{{NEXT_NUMBER}}",                             │
+│    "timestamp": "{{ISO_TIMESTAMP}}",                        │
+│    "agent": "[AGENT_NAME]",                                   │
+│    "stage": "[STAGE_NAME]",                                 │
+│    "action": "[STAGE] complete",                             │
+│    "status": "success",                                     │
+│    "nextAgent": "[NEXT_AGENT_NAME]"                         │
+│  }                                                         │
 └─────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────┐
-│  STEP 6: TRIGGER NEXT AGENT (MANDATORY)                     │
+│  STEP 6: CREATE CHECKPOINT (MANDATORY)                       │
+│  ─────────────────────────────────────────────────────────  │
+│  Add entry to session/tasks/task-N/checkpoints.md:           │
+│  {                                                         │
+│    "id": "cp-{{NEXT_NUMBER}}",                             │
+│    "name": "[STAGE]-COMPLETE",                               │
+│    "stage": "[STAGE_NAME]",                                 │
+│    "stageNumber": {{STAGE_NUMBER}},                          │
+│    "timestamp": "{{ISO_TIMESTAMP}}"                          │
+│  }                                                         │
+└─────────────────────────────────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│  STEP 7: TRIGGER NEXT AGENT (MANDATORY)                     │
 │  ─────────────────────────────────────────────────────────  │
 │  - Read next agent file IMMEDIATELY                         │
 │  - Do NOT ask "Should I continue?"                          │
@@ -93,22 +156,25 @@ During workflow execution, AI models tend to:
 
 ## Stage-to-Agent Mapping
 
-| Stage | Agent File | Must Read | Must Log |
-|-------|------------|-----------|----------|
-| Activation | `agents/orchestrator.md` | ✅ YES | ✅ YES |
-| Requirements | `agents/requirements-gatherer.md` | ✅ YES | ✅ YES |
-| Planning | `agents/planner.md` | ✅ YES | ✅ YES |
-| Planning | `agents/critic.md` | ✅ YES | ✅ YES |
-| Planning | `agents/synthesizer.md` | ✅ YES | ✅ YES |
-| Implementation | `agents/coder.md` | ✅ YES | ✅ YES |
-| Verification | `agents/tester.md` | ✅ YES | ✅ YES |
-| Review | `agents/reviewer.md` | ✅ YES | ✅ YES |
-| Quality Check | `agents/quality-*.md` (6 files) | ✅ YES | ✅ YES |
-| Refactor | `agents/refactor.md` | ✅ YES | ✅ YES |
-| Performance | `agents/performance.md` | ✅ YES | ✅ YES |
-| Security | `agents/security.md` | ✅ YES | ✅ YES |
-| Deploy | `agents/deploy.md` | ✅ YES | ✅ YES |
-| Complete | `agents/changelog.md` | ✅ YES | ✅ YES |
+| Stage | Agent File | Must Read | Must Log | Must Create Checkpoint |
+|-------|------------|-----------|----------|---------------------|
+| Activation | `agents/orchestrator.md` | ✅ YES | ✅ YES | ✅ YES |
+| Requirements | `agents/requirements-gatherer.md` | ✅ YES | ✅ YES | ✅ YES |
+| Planning | `agents/planner.md` | ✅ YES | ✅ YES | ✅ YES |
+| Planning | `agents/critic.md` | ✅ YES | ✅ YES | - |
+| Planning | `agents/synthesizer.md` | ✅ YES | ✅ YES | - |
+| Planning Complete | - | - | - | ✅ YES (PLANNING-COMPLETE) |
+| Implementation | `agents/coder.md` | ✅ YES | ✅ YES | ✅ YES |
+| Implementation Complete | - | - | - | ✅ YES (IMPLEMENTATION-COMPLETE) |
+| Verification | `agents/tester.md` | ✅ YES | ✅ YES | ✅ YES |
+| Verification Complete | - | - | - | ✅ YES (VERIFICATION-COMPLETE) |
+| Review | `agents/reviewer.md` | ✅ YES | ✅ YES | ✅ YES |
+| Review Complete | - | - | - | ✅ YES (REVIEW-COMPLETE) |
+| Security | `agents/security.md` | ✅ YES | ✅ YES | ✅ YES |
+| Security Complete | - | - | - | ✅ YES (SECURITY-COMPLETE) |
+| Deploy | `agents/deploy.md` | ✅ YES | ✅ YES | ✅ YES |
+| Deploy Complete | - | - | - | ✅ YES (DEPLOY-COMPLETE) |
+| Complete | - | - | - | ✅ YES (WORKFLOW-COMPLETE) |
 
 ---
 
@@ -122,6 +188,7 @@ After each stage, verify:
 □ Did I ADOPT the agent's personality? (Check: used agent's voice)
 □ Did I FOLLOW agent's instructions? (Check: output matches agent format)
 □ Did I LOG completion? (Check: log.md has completion entry)
+□ Did I CREATE checkpoint? (Check: checkpoints.md has entry)
 □ Did I TRIGGER next agent? (Check: read next agent file)
 ```
 
@@ -154,17 +221,35 @@ GOOD: [Read agents/quality-type-safety.md]
       ... (repeat for all 6 checkers)
 ```
 
-### ❌ Violation: Not Logging Activations
+### ❌ Violation: Not Creating Checkpoints
 
 ```
 BAD: log.md only has task start and end entries
 
 GOOD: log.md has entries for EVERY agent activation:
-      - ORCHESTRATOR activated
-      - REQUIREMENTS_GATHERER activated
-      - PLANNER activated
+      - PLANNING activated
       - CRITIC activated
+      - SYNTHESIZER activated
       - etc.
+
+AND checkpoints.md has entry for EACH stage:
+      - PLANNING-COMPLETE
+      - IMPLEMENTATION-COMPLETE
+      - VERIFICATION-COMPLETE
+      - etc.
+```
+
+### ❌ Violation: Same Timestamp for Stages
+
+```
+BAD: log-1: "2026-03-09T13:26:00.000Z" (PLANNER)
+     log-2: "2026-03-09T13:26:00.000Z" (CODER)
+     log-3: "2026-03-09T13:26:00.000Z" (TESTER)
+
+GOOD: log-1: "2026-03-09T13:26:00.000Z" (PLANNER)
+     log-2: "2026-03-09T13:26:30.000Z" (CRITIC)
+     log-3: "2026-03-09T13:27:00.000Z" (SYNTHESIZER)
+     log-4: "2026-03-09T13:27:45.000Z" (CODER)
 ```
 
 ---
@@ -179,6 +264,7 @@ Add to activation sequence:
 1. Read the agent file for that stage
 2. Log activation to session/log.md
 3. Follow agent's instructions exactly
+4. CREATE checkpoint after stage completes
 ```
 
 ### In Each Stage Template
@@ -190,19 +276,21 @@ Add at the top:
 1. READ: agents/[AGENT_NAME].md
 2. LOG: "[AGENT_NAME] activated" in session/log.md
 3. THEN: Proceed with stage execution
+4. AFTER COMPLETION: CREATE checkpoint in checkpoints.md
 ```
 
 ### In Each Agent File
 
 Add section:
 ```
-## Activation Verification ⚠️ REQUIRED
+## Completion Verification
 
 Before executing, you MUST:
 1. Have READ this file (not simulated)
 2. Have LOGGED activation in session/log.md
 3. FOLLOW all instructions in this file
 4. USE this agent's voice and format
+5. CREATE checkpoint when complete
 ```
 
 ---
@@ -211,9 +299,11 @@ Before executing, you MUST:
 
 Every execution should produce:
 
-1. **log.md entries** for each agent activation
-2. **Agent file reads** in conversation history
-3. **Outputs matching** agent-specified formats
+1. **log.json entries** for each agent activation
+2. **checkpoints.json entries** for each stage completion
+3. **Agent file reads** in conversation history
+4. **Outputs matching** agent-specified formats
+5. **Different timestamps** for each stage
 
 ---
 
@@ -226,6 +316,7 @@ If you realize you violated this protocol:
 3. **CORRECT** - Read the agent file now
 4. **RE-EXECUTE** - Follow the agent's instructions properly
 5. **LOG** - Add proper activation and completion entries
+6. **CREATE CHECKPOINT** - Add missing checkpoint
 
 ---
 

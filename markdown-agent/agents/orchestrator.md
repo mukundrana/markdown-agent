@@ -393,10 +393,42 @@ YOU CANNOT JUMP FROM QUALITY_CHECK TO DEPLOY!
 
 ## Task Completion and Next Task Transition
 
+**🚨🚨🚨 CRITICAL - THIS IS WHERE MOST WORKFLOWS BREAK 🚨🚨🚨**
+
+**🚨 ABSOLUTE RULE: ONCE WORKFLOW STARTED, NEVER ASK TO START NEXT TASK 🚨**
+
+**Workflow State Check:**
+```javascript
+READ session/queue.json
+CHECK: statistics.completed > 0 OR statistics.inProgress > 0
+IF (true) {
+  // Workflow ALREADY started - NEVER ask again
+  AUTO_START = true
+}
+```
+
+**❌ FORBIDDEN OUTPUTS (after workflow started):**
+- "Type 'execute' to start task-2"
+- "Should I start the next task?"
+- "Ready for next task?"
+- Any message asking for permission
+
+**✅ REQUIRED OUTPUT:**
+- "✅ task-1 complete! 🚀 Starting task-2..."
+- Then IMMEDIATELY read agents/requirements-gatherer.md
+
+---
+
 **MANDATORY**: When a task completes (stage 10 - DEPLOY finished), you MUST:
 
+### Step-by-Step MANDATORY Sequence
+
 ```javascript
-// 1. MARK current task as completed
+// ═══════════════════════════════════════════════════════════
+// 🚨 STOP - DO NOT SKIP ANY STEP
+// ═══════════════════════════════════════════════════════════
+
+// STEP 1: MARK current task as completed
 UPDATE session/tasks/task-N/state.json:
 {
   "status": "completed",
@@ -408,7 +440,7 @@ UPDATE session/tasks/task-N/state.json:
   }
 }
 
-// 2. UPDATE session/queue.json:
+// STEP 2: UPDATE session/queue.json
 {
   "updatedAt": "{{ISO_TIMESTAMP}}",
   "tasks": [
@@ -430,7 +462,8 @@ UPDATE session/tasks/task-N/state.json:
   "nextTaskId": "{{NEXT_PENDING_TASK_ID_OR_NULL}}"
 }
 
-// 3. LOG completion to session/tasks/task-N/log.json:
+// STEP 3: LOG completion
+APPEND to session/tasks/task-N/log.json:
 {
   "id": "log-{{NEXT_NUMBER}}",
   "timestamp": "{{ISO_TIMESTAMP}}",
@@ -445,33 +478,135 @@ UPDATE session/tasks/task-N/state.json:
   }
 }
 
-// 4. SYNC session/data.js with updated data
+// STEP 4: SYNC session/data.js with updated data
 
-// 5. CHECK for pending tasks:
-READ session/queue.json
-FIND first task with status "pending"
+// ═══════════════════════════════════════════════════════════
+// 🚨 CRITICAL CHECKPOINT - QUEUE CHECK IS MANDATORY
+// ═══════════════════════════════════════════════════════════
 
+// STEP 5: 🚨 MANDATORY QUEUE CHECK 🚨
+// YOU MUST READ session/queue.json RIGHT NOW!
+// DO NOT PROCEED WITHOUT READING IT!
+
+READ session/queue.json (Use Read tool - MANDATORY!)
+FIND first task with status = "pending"
+
+// STEP 6: DECIDE BASED ON QUEUE STATE
 IF (pending task exists) {
-  // 6a. AUTO-START next task (if autoExecuteNext=true in config)
+  // ═══════════════════════════════════════════════════════════
+  // 🚨 CRITICAL: AUTO-START NEXT TASK
+  // ═══════════════════════════════════════════════════════════
+  // DO NOT ASK USER!
+  // DO NOT SAY "Should I start next task?"
+  // DO NOT STOP HERE!
+  // AUTOMATICALLY START NEXT TASK!
+
   const nextTaskId = findNextPendingTask();
-  UPDATE session/tasks/{nextTaskId}/state.json:
-  {
-    "status": "in_progress",
-    "startedAt": "{{ISO_TIMESTAMP}}"
+
+  // ═══════════════════════════════════════════════════════════
+  // 🚨🚨🚨 CRITICAL: CREATE TASK FOLDER FIRST 🚨🚨🚨
+  // ═══════════════════════════════════════════════════════════
+  // This is the MOST COMMON BUG: task folder doesn't exist!
+  // ALWAYS check and create BEFORE updating state.json
+
+  CHECK if session/tasks/{nextTaskId}/ folder exists
+  IF (folder does NOT exist) {
+    // CREATE the task folder structure FIRST
+    CREATE session/tasks/{nextTaskId}/
+    CREATE session/tasks/{nextTaskId}/state.json (initial template below)
+    CREATE session/tasks/{nextTaskId}/log.json (empty entries array)
+    CREATE session/tasks/{nextTaskId}/checkpoints.json (empty checkpoints array)
+    CREATE session/tasks/{nextTaskId}/reports/ (folder)
   }
+
+  // ═══════════════════════════════════════════════════════════
+  // NOW UPDATE state.json (folder exists)
+  // ═══════════════════════════════════════════════════════════
+
+  READ session/queue.json to get next task details
+  GET nextTaskName, nextTaskDescription from queue.json
+
+  CREATE or UPDATE session/tasks/{nextTaskId}/state.json:
+  {
+    "taskId": nextTaskId,
+    "name": nextTaskName,
+    "description": nextTaskDescription,
+    "status": "in_progress",
+    "priority": "{{FROM_QUEUE}}",
+    "complexity": "{{FROM_QUEUE}}",
+    "workflow": "{{FROM_QUEUE}}",
+    "currentStage": {
+      "name": "REQUIREMENTS",
+      "number": 1,
+      "progress": 0
+    },
+    "progress": 0,
+    "createdAt": "{{ISO_TIMESTAMP}}",
+    "startedAt": "{{ISO_TIMESTAMP}}",
+    "updatedAt": "{{ISO_TIMESTAMP}}",
+    "agents": {
+      "completed": [],
+      "current": "REQUIREMENTS-GATHERER",
+      "pending": ["PLANNER", "CRITIC", "SYNTHESIZER", "CODER", "TESTER", "REVIEWER", "SECURITY", "DEPLOY"]
+    },
+    "metrics": {
+      "filesCreated": 0,
+      "filesModified": 0,
+      "testsWritten": 0,
+      "testsPassing": 0,
+      "testsFailing": 0
+    },
+    "error": null,
+    "context": {
+      "tokenCount": 0,
+      "compressionLevel": "standard",
+      "archivedStages": [],
+      "summaries": {}
+    },
+    "kpis": {
+      "efficiency": {},
+      "quality": {},
+      "reliability": {},
+      "process": {},
+      "overall": {"score": 0, "verdict": "PENDING"},
+      "history": [],
+      "alerts": []
+    }
+  }
+
   UPDATE session/queue.json:
   {
     "nextTaskId": nextTaskId,
     "statistics.inProgress": 1,
     "statistics.pending": {{PENDING-1}}
   }
-  SYNC session/data.js
-  NOTIFY user: "✅ task-N complete! 🚀 Starting {nextTaskId}..."
-  TRIGGER REQUIREMENTS-GATHERER agent for nextTaskId
+
+  SYNC session/data.js with BOTH task data
+
+  // NOTIFY user (but do NOT wait for response)
+  OUTPUT: "✅ task-N complete! 🚀 Starting {nextTaskId}..."
+
+  // ═══════════════════════════════════════════════════════════
+  // 🚨 MANDATORY: TRIGGER NEXT AGENT IMMEDIATELY
+  // ═══════════════════════════════════════════════════════════
+  // DO NOT STOP HERE!
+  // READ agents/requirements-gatherer.md RIGHT NOW!
+  // TRIGGER REQUIREMENTS-GATHERER for nextTaskId
+
+  READ agents/requirements-gatherer.md
+  [Follow REQUIREMENTS-GATHERER instructions for nextTaskId]
+
 } ELSE {
-  // 6b. ALL TASKS COMPLETE
+  // ═══════════════════════════════════════════════════════════
+  // ALL TASKS COMPLETE
+  // ═══════════════════════════════════════════════════════════
   SYNC session/data.js
-  NOTIFY user: "🎉 All tasks complete! Queue is empty.\n\nAdd more tasks with: 'Add task: [description]'\nOr check status with: 'status'"
+
+  OUTPUT: "🎉 All tasks complete! Queue is empty."
+  OUTPUT: "Add more tasks with: 'Add task: [description]'"
+  OUTPUT: "Or check status with: 'status'"
+
+  // This is the ONLY time you stop
   WAIT for user input
 }
 ```
@@ -594,6 +729,10 @@ After task completion (stage 10 - DEPLOY), verify:
 - [ ] session/queue.json updated with task status
 - [ ] session/data.js synced with latest data
 - [ ] Pending tasks checked in queue
+- [ ] **If pending task exists, CHECK if task folder exists**
+- [ ] **If folder missing, CREATE task folder structure**
+- [ ] **CREATE initial state.json, log.json, checkpoints.json**
+- [ ] **THEN UPDATE state.json to in_progress**
 - [ ] If pending tasks exist: Next task started and REQUIREMENTS-GATHERER triggered
 - [ ] If no pending tasks: User notified of all tasks complete
 
@@ -618,3 +757,112 @@ During stage transitions, verify:
 ---
 
 **Remember: You coordinate, agents update their own JSON files. Then you sync to data.js for the dashboard.**
+
+---
+
+## 🆕 TASK FOLDER CREATION REFERENCE
+
+**Use this when creating a new task folder for queued tasks:**
+
+### Folder Structure
+```
+session/tasks/{nextTaskId}/
+├── state.json
+├── log.json
+├── checkpoints.json
+└── reports/
+```
+
+### state.json Template (NEW TASK)
+```json
+{
+  "taskId": "{nextTaskId}",
+  "name": "{FROM_QUEUE}",
+  "description": "{FROM_QUEUE}",
+  "status": "in_progress",
+  "priority": "{medium|high|low}",
+  "complexity": "{trivial|simple|moderate|complex}",
+  "workflow": "{quick|standard|full}",
+  "currentStage": {
+    "name": "REQUIREMENTS",
+    "number": 1,
+    "progress": 0
+  },
+  "progress": 0,
+  "createdAt": "{ISO_TIMESTAMP}",
+  "startedAt": "{ISO_TIMESTAMP}",
+  "updatedAt": "{ISO_TIMESTAMP}",
+  "agents": {
+    "completed": [],
+    "current": "REQUIREMENTS-GATHERER",
+    "pending": ["PLANNER", "CRITIC", "SYNTHESIZER", "CODER", "TESTER", "REVIEWER", "SECURITY", "DEPLOY"]
+  },
+  "metrics": {
+    "filesCreated": 0,
+    "filesModified": 0,
+    "testsWritten": 0,
+    "testsPassing": 0,
+    "testsFailing": 0
+  },
+  "error": null,
+  "context": {
+    "tokenCount": 0,
+    "compressionLevel": "standard",
+    "archivedStages": [],
+    "summaries": {}
+  },
+  "kpis": {
+    "efficiency": {},
+    "quality": {},
+    "reliability": {},
+    "process": {},
+    "overall": {"score": 0, "verdict": "PENDING"},
+    "history": [],
+    "alerts": []
+  }
+}
+```
+
+### log.json Template (NEW TASK)
+```json
+{
+  "taskId": "{nextTaskId}",
+  "entries": []
+}
+```
+
+### checkpoints.json Template (NEW TASK)
+```json
+{
+  "taskId": "{nextTaskId}",
+  "checkpoints": []
+}
+```
+
+---
+
+## 🚨 COMMON BUG: TASK FOLDER NOT CREATED
+
+**Symptom:**
+- Task appears in queue.json as "completed"
+- But NO task folder exists in session/tasks/
+- NO actual work was done
+
+**Root Cause:**
+- ORCHESTRATOR tried to UPDATE state.json
+- But the task folder was NEVER created
+- So the update failed silently
+
+**Fix:**
+ALWAYS check if folder exists, CREATE if missing:
+
+```
+CHECK session/tasks/{nextTaskId}/ exists
+IF NOT:
+  CREATE folder structure
+  CREATE initial state.json, log.json, checkpoints.json
+THEN:
+  UPDATE state.json to in_progress
+```
+
+---

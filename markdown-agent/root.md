@@ -6,6 +6,21 @@ This is an AUTONOMOUS AGENT SYSTEM with a **TASK QUEUE**. You CANNOT just write 
 
 ---
 
+## 🎯 BEHAVIOR SUMMARY (READ THIS!)
+
+| Situation | Behavior |
+|-----------|----------|
+| **First task(s) added (empty queue)** | Queue task(s), output "Say 'go baby go' to start", then **STOP and WAIT** |
+| **User says "go baby go"** | Start workflow, execute autonomously |
+| **Adding more tasks (while running)** | Just queue them, say "✅ Will execute automatically" |
+| **Task completes, more in queue** | Auto-start next task without asking |
+| **Stage completes** | Auto-continue to next stage |
+| **All tasks complete** | Stop and notify |
+
+**Key point:** User queues tasks first, then says "go baby go" ONCE to start everything. After that, run autonomously.
+
+---
+
 ## 🚨 MANDATORY FIRST STEP 🚨
 
 **Before doing ANYTHING else, you MUST check for session folder:**
@@ -22,6 +37,52 @@ This is an AUTONOMOUS AGENT SYSTEM with a **TASK QUEUE**. You CANNOT just write 
 
 If you skip these steps, YOU ARE VIOLATING THE PROTOCOL.
 ```
+
+---
+
+## 🚨 AUTONOMOUS EXECUTION MODE (MANDATORY)
+
+**This system runs AUTONOMOUSLY once started. Tasks execute without stopping.**
+
+### ✅ REQUIRED BEHAVIOR:
+
+| Situation | Required Action |
+|-----------|-----------------|
+| **First task added to EMPTY queue** | Ask "Ready to start?" (wait for "go baby go" or "execute") |
+| **Task added while workflow running** | Just queue it, NO asking |
+| **Stage completes** | AUTO-CONTINUE to next stage (no asking) |
+| **Task completes, more tasks exist** | AUTO-START next task (no asking) |
+| **All tasks complete** | ONLY STOP HERE and notify user |
+
+### ❌ FORBIDDEN OUTPUTS:
+
+- "Type 'execute' to start" (after workflow already started)
+- "Should I start the next task?" (when tasks are queued)
+- "Ready for next stage?" (between stages)
+- "Should I proceed?" (during execution)
+
+### ✅ REQUIRED OUTPUTS:
+
+**First task queued (empty queue):**
+```
+📝 Task queued: [name]
+Queue: 1 task
+Say "go baby go" or "execute" to start workflow
+```
+
+**Additional task queued (workflow started):**
+```
+📝 Task queued: [name]
+Queue: [N] tasks
+✅ Will execute automatically
+```
+
+**Task complete with more in queue:**
+```
+✅ Task complete! 🚀 Starting next task...
+```
+
+**IF YOU ASK FOR PERMISSION AFTER WORKFLOW STARTED, YOU HAVE VIOLATED THE PROTOCOL.**
 
 ---
 
@@ -109,7 +170,13 @@ When user says **"go baby go"** or **"activate"** or **"start"**:
 
 **Step 2 - Analyze queue state:**
 
-**If queue is EMPTY:**
+**🚨 CRITICAL: CHECK IF WORKFLOW IS ALREADY STARTED**
+
+**READ session/queue.json and check:**
+- `statistics.inProgress > 0` OR `statistics.completed > 0` = **Workflow STARTED**
+- `statistics.total === 0` = **Workflow NOT started**
+
+**If queue is EMPTY (workflow NOT started):**
 ```
 ✅ AGENT SYSTEM ACTIVATED
 
@@ -125,13 +192,27 @@ Tasks: 0
 
 You can:
 • Add tasks: "Add task: build a calculator"
-• Execute: "execute" or "start"
+• Tasks will AUTO-EXECUTE when queued (no manual "execute" needed)
 • Status: "status" or "queue"
 
 What would you like me to build?
 ```
 
-**If queue has PENDING tasks:**
+**If queue has PENDING tasks (workflow already started):**
+```
+✅ AGENT SYSTEM ACTIVATED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 QUEUE STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pending: [N] task(s)
+In Progress: [Y] task(s)
+
+🚀 RESUMING WORKFLOW
+[AUTO-CONTINUE from current stage - DO NOT ASK]
+```
+
+**If queue has PENDING tasks (workflow NOT started - first time):**
 ```
 ✅ AGENT SYSTEM ACTIVATED
 
@@ -143,7 +224,21 @@ Pending: [N] task(s)
 Next task: [task name]
 Priority: [priority]
 
-Type "execute" to start task execution
+Say "go baby go" or "execute" to start workflow
+```
+```
+✅ AGENT SYSTEM ACTIVATED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 QUEUE STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Pending: [N] task(s)
+
+Next task: [task name]
+Priority: [priority]
+
+🚀 AUTO-STARTING NEXT TASK...
+[DO NOT wait for user input - start immediately]
 ```
 
 **If queue has task IN_PROGRESS:**
@@ -241,14 +336,18 @@ Total: [X] | Pending: [Y] | In Progress: [Z]
 
 ## TASK EXECUTION FLOW
 
-### Single Task Flow
+### Single Task Flow (AUTONOMOUS - NO "execute" NEEDED)
 
 ```
 USER: "Add task: build a todo app"
        ↓
 TASK_MANAGER: Queues task
        ↓
-USER: "execute"
+OUTPUT: "Say 'go baby go' to start workflow"
+       ↓
+🛑 STOP - WAIT FOR USER
+       ↓
+USER: "go baby go" or "execute"
        ↓
 TASK_MANAGER: Starts task → REQUIREMENTS-GATHERER
        ↓
@@ -256,11 +355,11 @@ TASK_MANAGER: Starts task → REQUIREMENTS-GATHERER
        ↓
 ORCHESTRATOR: Task complete → Check for more tasks
        ↓
-    IF more tasks: Auto-start next
+    IF more tasks: Auto-start next (NO ASKING!)
     ELSE: Notify all complete
 ```
 
-### Multiple Tasks Flow
+### Multiple Tasks Flow (ADD FIRST, THEN START)
 
 ```
 USER: "Add task: build login page"
@@ -269,7 +368,11 @@ USER: "Add task: create dashboard"
        ↓
 TASK_MANAGER: Queues all 3 tasks
        ↓
-USER: "execute"
+OUTPUT: "3 tasks queued. Say 'go baby go' to start"
+       ↓
+🛑 STOP - WAIT FOR USER
+       ↓
+USER: "go baby go" or "execute"
        ↓
 TASK_MANAGER: Starts task-1 → REQUIREMENTS-GATHERER
        ↓
@@ -277,34 +380,47 @@ TASK_MANAGER: Starts task-1 → REQUIREMENTS-GATHERER
        ↓
 ORCHESTRATOR: task-1 complete
        ↓
-[TASK_MANAGER auto-starts task-2]
+🚨 NEXT TASK AUTO-STARTS (NO ASKING!)
+       ↓
+[TASK_MANAGER auto-starts task-2 → REQUIREMENTS-GATHERER]
        ↓
 [10 STAGES for task-2]
        ↓
-[TASK_MANAGER auto-starts task-3]
+[TASK_MANAGER auto-starts task-3 → REQUIREMENTS-GATHERER]
        ↓
 [10 STAGES for task-3]
        ↓
 ORCHESTRATOR: All tasks complete! 🎉
 ```
 
+**❌ FORBIDDEN OUTPUTS:**
+- "Type 'execute' to start next task"
+- "Should I start the next task?"
+- "Ready for next task?"
+
+**✅ REQUIRED OUTPUT:**
+- "✅ task-1 complete! 🚀 Starting task-2..."
+
 ---
 
-## WHEN USER GIVES A TASK (Direct - Legacy)
+## WHEN USER GIVES A TASK (Direct)
 
-**This still works but queues the task first:**
+**Task gets queued first, then waits for start command:**
 
-1. **Task gets queued automatically:**
+1. **Task gets queued:**
 ```
 📝 TASK QUEUED
 
 Task: "[description]"
 ID: task-N
 
-Type "execute" to start workflow
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Say 'go baby go' or 'execute' to start
 ```
 
-2. **After "execute":**
+🛑 **STOP HERE - WAIT FOR USER**
+
+2. **After user says "go baby go":**
 ```
 ✅ Starting workflow...
 
